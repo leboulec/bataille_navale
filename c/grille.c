@@ -39,7 +39,7 @@ void afficheGrille(int grille[N][N]){
 	printf("\n");
 	}
 	
-	printf("͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞͞͞ ͞͞ ͞͞ ͞͞  \n");
+	printf(" ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞͞͞ ͞͞ ͞͞ ͞͞  \n");
 	
 }
 
@@ -48,7 +48,6 @@ void afficheGrille(int grille[N][N]){
     1 contre-torpilleurs (3 cases) -----> rempli avec 3
     1 contre-torpilleurs (3 cases) -----> rempli avec 4
     1 torpilleur (2 cases) -----> rempli avec 5 */
-
 
 void rempliGrille(int grille[N][N]){
 
