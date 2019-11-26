@@ -5,7 +5,7 @@
 
 void initGrille(int grille[N][N]){
 
-	for(int e=0; e<N; e++){ //parcours par ligne
+	for(int e=0; e<N; e++){ 
 		for(int f=0; f<N; f++){
 
 			grille[e][f] = 0;
@@ -39,7 +39,7 @@ void afficheGrille(int grille[N][N]){
 	printf("\n");
 	}
 	
-	printf(" ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞͞͞ ͞͞ ͞͞ ͞͞  \n");
+	printf("͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞͞͞ ͞͞ ͞͞ ͞͞  \n");
 	
 }
 
@@ -49,21 +49,27 @@ void afficheGrille(int grille[N][N]){
     1 contre-torpilleurs (3 cases) -----> rempli avec 4
     1 torpilleur (2 cases) -----> rempli avec 5 */
 
-void rempliGrille(int grille[N][N]){
+
+void remplitGrille(int grille[N][N]){
 
 	int e = 1;
 
 	while(e<=5){
 
-		if(  ((int)(rand() / (double)RAND_MAX))==1  )
+	int i = (int)(rand() / (double)RAND_MAX * (N - 1));
+	int j = (int)(rand() / (double)RAND_MAX * (N - 1));
 
-			int i = (int)(rand() / (double)RAND_MAX * (N - 1));
-			int j = (int)(rand() / (double)RAND_MAX * (N - 1));
+	if(grille[i][j] == 0){ //Pour pas que les bateaux soient au même endroit
+		grille[i][j] = e;
+		printf("%d  %d\n",i,j);
+		e++; }
 
+	else{
 
-	grille[i][j] = e;
-	e++;
+		int i = (int)(rand() / (double)RAND_MAX * (N - 1));
+		int j = (int)(rand() / (double)RAND_MAX * (N - 1));
 
+		}
 	}
 }
 
@@ -73,7 +79,7 @@ int main(){
 	int grille[N][N];
 
 	initGrille(grille);
-	rempliGrille(grille);
+	remplitGrille(grille);
 	afficheGrille(grille);
 
 
