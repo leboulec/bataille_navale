@@ -7,7 +7,6 @@ void initGrille(int grille[N][N]){
 
 	for(int e=0; e<N; e++){ 
 		for(int f=0; f<N; f++){
-
 			grille[e][f] = 0;
 		}
 	}
@@ -15,7 +14,7 @@ void initGrille(int grille[N][N]){
 }
 
 
-void afficheGrille(int grille[N][N]){
+void afficheGrille(int grille[N][N], char mode){
 
 	printf("_____________________\n");
 
@@ -25,37 +24,42 @@ void afficheGrille(int grille[N][N]){
 
 		for(int colonne=0; colonne<N; colonne++){
 
-			if(grille[ligne][colonne] == 0){
-
-				printf("~|");
-				
+			if(mode == 'd'){
+				switch(grille[ligne][colonne]){
+					case -2:
+						printf("x|");
+						break;
+					case -1:
+						printf("X|");
+						break;
+					case 0:
+						printf("~|");
+						break;
+					case 1:
+						printf("#|");
+						break;
+					case 2:
+						printf("O|");
+						break;
+					case 3:
+						printf("$|");
+						break;
+					case 4:
+						printf("$|");
+						break;
+					case 5:
+						printf("@|");
+						break;
+					default:
+						printf("B|");
+				}
+			} else{
+				if(grille[ligne][colonne] == -1){
+					printf("X|");
+				} else{
+					printf("~|");
+				}
 			}
-
-			else if(grille[ligne][colonne] == 4){
-				printf("¤|");
-
-			}
-
-			else if(grille[ligne][colonne] == 1){
-				printf("#|");
-
-			}
-			
-			else if(grille[ligne][colonne] == 2){
-				printf("O|");
-
-			}
-
-			else if(grille[ligne][colonne] == 3){
-				printf("$|");
-
-			}
-
-			else if(grille[ligne][colonne] == 5){
-				printf("@|");
-
-			}
-
 		} 
 
 	printf("\n");
@@ -72,10 +76,8 @@ void afficheGrille(int grille[N][N]){
     1 torpilleur (2 cases) -----> rempli avec 2 */
 
 
-void poseBateau(int grille[N][N], int taille, int nombre_bateau){
-
+int poseBateau(int grille[N][N], int taille, int nombre_bateau){
 	static int numBateau = 1;
-
 	/* Installation des porte avions */
 
 	for(int i = 0; i<nombre_bateau;i++){
@@ -123,25 +125,55 @@ void poseBateau(int grille[N][N], int taille, int nombre_bateau){
 		}
 	numBateau++;
 	}
+	return numBateau;
 }
 
-void remplitGrille(int grille[N][N]){
-
+int remplitGrille(int grille[N][N]){
+	int nbBateaux;
 	poseBateau(grille,5,1);
 	poseBateau(grille,4,1);
 	poseBateau(grille,3,2);
-	poseBateau(grille,2,1);
+	nbBateaux = poseBateau(grille,2,1);
+	return nbBateaux;
 }
 		
+int encoreBateau(int grille[N][N], int numBateau){
+		for(int i=0; i<N; i++){
+			for(int j=0; j<N; j++){
+				if(grille[i][j] == numBateau){
+					return 1;
+				}
+			}
+		}
+		return 0;
+}
 
-
-
-
-int main(){
-	srand (time (NULL));
-	int grille[N][N];
-
-	initGrille(grille);
-	remplitGrille(grille);
-	afficheGrille(grille);
+void tire(int grille[N][N], int* nbBateaux){
+	int x,y;
+	int flag = 0;
+	int contenuCase;
+	while(!flag){
+		printf("Ligne: ");
+		scanf("%d", &x);
+		printf("Colonne: ");
+		scanf("%d", &y);
+		if(x<N+1 && x>0 && y<N+1 && y>0){
+			flag = 1;
+			x--;
+			y--;
+		}
+	}
+	contenuCase = grille[x][y];
+	if(contenuCase > 0){
+		grille[x][y] = -1;
+		if(encoreBateau(grille, contenuCase)){
+			printf("Touché !\n");
+		} else{
+			printf("Coulé !\n");
+			*nbBateaux -= 1;
+		}
+	} else{
+		grille[x][y] = -2;
+		printf("Plouf !\n");
+	}
 }
