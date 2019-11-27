@@ -16,11 +16,14 @@ void initGrille(int grille[N][N]){
 
 void afficheGrille(int grille[N][N], char mode){
 
-	printf("_____________________\n");
+	int k=0;
+	printf("_______________________\n");
+	printf("|.|0|1|2|3|4|5|6|7|8|9|\n");
 
 	for(int ligne=0; ligne<N; ligne++){ 
 
-		printf("|");
+		printf("|%d|",k);
+		k++;
 
 		for(int colonne=0; colonne<N; colonne++){
 
@@ -55,8 +58,13 @@ void afficheGrille(int grille[N][N], char mode){
 				}
 			} else{
 				if(grille[ligne][colonne] == -1){
+					printf("O|");}
+
+				else if(grille[ligne][colonne] == -2){
 					printf("X|");
-				} else{
+
+				}
+				else{
 					printf("~|");
 				}
 			}
@@ -65,7 +73,7 @@ void afficheGrille(int grille[N][N], char mode){
 	printf("\n");
 	}
 	
-	printf(" ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞͞͞ ͞͞ ͞͞ ͞͞  \n");
+	printf(" ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞͞͞ ͞͞ ͞͞ ͞͞  ͞͞    \n");
 	
 }
 
@@ -157,10 +165,8 @@ void tire(int grille[N][N], int* nbBateaux){
 		scanf("%d", &x);
 		printf("Colonne: ");
 		scanf("%d", &y);
-		if(x<N+1 && x>0 && y<N+1 && y>0){
+		if(x<N && x>=0 && y<N && y>=0){
 			flag = 1;
-			x--;
-			y--;
 		}
 	}
 	contenuCase = grille[x][y];
