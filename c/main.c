@@ -15,6 +15,8 @@ int main(){
 		for(int f=0; f<N; f++){
 			grille2[e][f] = grille[e][f];}}
 
+	afficheGrille(grille, 'j');
+
 	while(nbBateaux){
 		tire(grille, &nbBateaux);
 		printf("Il reste %d bateaux\n", nbBateaux);
