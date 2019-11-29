@@ -25,4 +25,7 @@ int main(){
 	}
 	printf("Bravo ! Vous avez gagné en %d coups !\n", nbCoup);
 	afficheGrille(grille2, 'd');
+
+	char* filename = "score.txt";
+	scoreboard(filename, nbCoup);
 }
