@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "grille.h"
+#define MIN(a,b) a<b ? a:b
 
 void initGrille(int grille[N][N]){
 
@@ -181,5 +182,20 @@ void tire(int grille[N][N], int* nbBateaux){
 	} else{
 		grille[x][y] = -2;
 		printf("Plouf !\n");
+	}
+}
+
+void scoreboard(char* filename, int score){
+	int scoreFichier;
+	FILE* fichier;
+	if( (fichier = fopen(filename, "r+")) != NULL){
+		fscanf(fichier, "%d", &scoreFichier);
+		fprintf(fichier, "%d", MIN(score, scoreFichier));
+		if(MIN(score, scoreFichier) == score){
+			printf("Nouveau record!\n");
+		}
+		fclose(fichier);
+	} else{
+		printf("Erreur: impossible d'ouvrir le fichier\n");
 	}
 }

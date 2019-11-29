@@ -23,4 +23,7 @@ int encoreBateau(int grille[N][N], int numBateau);
 /* Tire une torpille */
 void tire(int grille[N][N], int* nbBateaux);
 
+/*  Score */
+void scoreboard(char* filename, int score);
+
 #endif
