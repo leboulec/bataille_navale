@@ -10,7 +10,7 @@ int poseBateau(int grille[N][N], int taille, int nbBateau);
 void initGrille(int grille[N][N]);
 
 /* Affiche tous les bateaux si mode vaut d
- * Affiche la grille caché si mode vaut j*/
+ * Affiche la grille cachée si mode vaut j*/
 void afficheGrille(int grille[N][N], char mode);
 
 /* Remplit la grille en appelant poseBateau
