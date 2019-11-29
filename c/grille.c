@@ -188,7 +188,7 @@ void tire(int grille[N][N], int* nbBateaux){
 void scoreboard(char* filename, int score){
 	int scoreFichier;
 	FILE* fichier;
-	if( (fichier = fopen(filename, "r+")) != NULL){
+	if( (fichier = fopen(filename, "w+")) != NULL){
 		fscanf(fichier, "%d", &scoreFichier);
 		fprintf(fichier, "%d", MIN(score, scoreFichier));
 		if(MIN(score, scoreFichier) == score){
