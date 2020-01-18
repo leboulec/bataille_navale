@@ -39,7 +39,8 @@ for_init_grille:
 
 affiche_grille:							# Fonction affichant la grille
 										# Argument $a0 : adresse de la grille
-		lw $t0, 0($a0)					# $t0 <- T
+		lw $t0, 0($a0)					# $t0 <- T[0]
+		or $t6, $zero, $a0				# $t6 <- T
 
 		la $a0, bord_grille				# Affichage du bord supérieur de la grille
 		ori $v0, $zero, 4
@@ -85,8 +86,8 @@ suite_bat:
 			syscall
 
 			addi $t2, $t2, 1			# colonne++
-			addi $a0, $a0, 4
-			lw $t0, 0($a0)				# $t0 <- T[i++]
+			addi $t6, $t6, 4
+			lw $t0, 0($t6)				# $t0 <- T[i++]
 
 			slti $t5, $t2, 10			# $t5 <- colonne < 10
 			bne $t5, $zero, for_aff_grille_colonne
