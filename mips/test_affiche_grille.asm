@@ -15,6 +15,12 @@ main:
 		jal init_grille
 		lw $a0, 0($sp)					# Restauration de l'argument
 		
+		ori $t0, $zero, -1
+		sw $t0, 8($a0)
+
+		ori $t0, $zero, -2
+		sw $t0, 100($a0)
+
 		la $a0, grille					# Appel de affiche_grille
 		sw $a0, 0($sp)					# Sauvegarde de l'argument
 		jal affiche_grille
