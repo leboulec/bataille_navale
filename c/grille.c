@@ -213,10 +213,14 @@ void tableau_score(char* filename, int score){
 
 	int scoreFichier;
 	FILE* fichier;
+<<<<<<< HEAD
 	char username[50];
 
 	if( (fichier = fopen(filename, "w+")) != NULL){
 
+=======
+	if( (fichier = fopen(filename, "w+")) != NULL){
+>>>>>>> 3f7dfffeacc9ecbf4a1442466f3ddeff3e4679e6
 		fscanf(fichier, "%d", &scoreFichier);
 
 		if(MAX(score, scoreFichier) == scoreFichier){
