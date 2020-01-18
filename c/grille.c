@@ -6,14 +6,12 @@
 
 void initGrille(int grille[N][N]){
 
-	for(int e=0; e<N; e++){ 
+	for(int e=0; e<N; e++){
 		for(int f=0; f<N; f++){
 			grille[e][f] = 0;
 		}
 	}
-
 }
-
 
 void afficheGrille(int grille[N][N], char mode){
 
@@ -21,7 +19,7 @@ void afficheGrille(int grille[N][N], char mode){
 	printf("_______________________\n");
 	printf("|.|0|1|2|3|4|5|6|7|8|9|\n");
 
-	for(int ligne=0; ligne<N; ligne++){ 
+	for(int ligne=0; ligne<N; ligne++){
 
 		printf("|%d|",k);
 		k++;
@@ -69,13 +67,13 @@ void afficheGrille(int grille[N][N], char mode){
 					printf("~|");
 				}
 			}
-		} 
+		}
 
 	printf("\n");
 	}
-	
+
 	printf(" ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞ ͞͞͞͞ ͞͞ ͞͞ ͞͞  ͞͞    \n");
-	
+
 }
 
 /*  1 porte-avions (5 cases) ----> rempli avec 5
@@ -145,7 +143,7 @@ int remplitGrille(int grille[N][N]){
 	nbBateaux = poseBateau(grille,2,1);
 	return nbBateaux;
 }
-		
+
 int encoreBateau(int grille[N][N], int numBateau){
 		for(int i=0; i<N; i++){
 			for(int j=0; j<N; j++){
