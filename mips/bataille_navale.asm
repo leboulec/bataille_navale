@@ -15,6 +15,8 @@ main:
 		la $a0, grille					# Appel de affiche_grille
 		jal affiche_grille
 
+		ori $s0, $zero, 0				# $s0 <- nombre total de bateaux posés
+
 		ori $v0, $zero, 10
 		syscall
 
@@ -101,3 +103,118 @@ suite_bat:
 		syscall
 
 		jr $ra
+
+pose_bateaux:							# Fonction posant un nombre de bateux de même taille aléatoirement sur la grille
+										# Arguments : $a0 <- adresse de la grille, $a1 <- nombre de bateaux à poser, $a2 <- taille des bateaux à poser
+										# Retourne dans $v0 le nombre de bateaux posés
+		subu $sp, $sp, 64				## Prologue
+		sw $fp, 60($sp)					##
+		addu $fp, $sp, 64				##
+		sw $a0, 0($sp)					# Sauvegarde de l'adresse de la grille
+		sw $s0, 4($sp)					# Sauvegarde du nombre de bateaux total sur la grille	###A RESTAURER IMPERATIVEMENT###
+		or $t1, $zero, $a1				# $t1 <- nombre de bateaux à poser
+
+		ori $t0, $t0, 0					# $t0 <- i=0
+for_pose_bateaux:
+while_pose_bateaux:
+		ori $a0, $zero, 7364			# $a0 <- seed
+		ori $a1, $zero, 10				# $a1 <- randmax + 1
+		ori $v0, $zero, 42				# Code service random
+		syscall
+		or $t3, $zero, $a0				# $t3 <- x = rand()
+
+		ori $a0, $zero, 7364			# $t4 <- y = rand()
+		ori $a1, $zero, 10
+		ori $v0, $zero, 42
+		syscall
+		or $t4, $zero, $a0
+
+		ori $a0, $zero, 7364			# $t5 <- orientation = rand()
+		ori $a1, $zero, 2
+		ori $v0, $zero, 42
+		syscall
+		or $t5, $zero, $a0
+
+		beq	$t5, $zero, if_pose_bateaux_vert # Si l'orientation est verticale jump
+
+										# Sinon l'orientation est horizontale
+		sub $t6, $zero, $a2				# $t6 <- -tailleBateauxAPoser
+		addi $t6, $t6, 10				# $t6 <- tailleGrille - tailleBateauxAPoser
+		slt $t6, $t6, $t3				# $t6 <- x > tailleGrille - tailleBateauxAPoser
+		bne $t6, $zero, while_pose_bateaux	# La pose est impossible, on revient au début du while	###$t2 DISPO###
+
+		###JE ME SUIS PERDU DANS LES FOR: A REFAIRE###
+
+		multi $t4, 10
+		mflo $t7
+		add $t7, $t7, $t3
+		multi $t7, 4
+		mflo $t7						# $t7 <- Addresse relative de T[x][y]
+		lw $t6, 0($sp)					# $t6 <- addresse de la grille
+		add $t6, $t6, $t7				# $t6 <- addresse de l'élément du tableau à tester
+
+		or $t2, $zero, $t3				# $t2 <- i=x
+for_pose_bat_hor:
+		lw $t6, 0($t6)					# $t6 <- élément du tableau à tester
+		bne $t6, $zero, while_pose_bateaux # La pose est impossible, on revient au début du while
+		addi $t2, $t2, 1				# i++
+		addi $t7, $t7, 4				# T[x+1][y]
+		add $t8, $t3, $a2				# $t8 <- x + tailleBateauxAPoser
+		slt $t8, $t2, $t6				# $t8 <- i < x + tailleBateauxAPoser
+		bne $t8, $zero, for_pose_bat_hor
+
+		j suite_if_pose_bateaux_vert
+if_pose_bateaux_vert:
+		sub $t6, $zero, $a2				# $t6 <- -tailleBateauxAPoser
+		addi $t6, $t6, 10				# $t6 <- tailleGrille - tailleBateauxAPoser
+		slt $t6, $t6, $t4				# $t6 <- y > tailleGrille - tailleBateauxAPoser
+		bne $t6, $zero, while_pose_bateaux	# La pose est impossible, on revient au début du while	###$t2 DISPO###
+
+		multi $t4, 10
+		mflo $t7
+		add $t7, $t7, $t3				
+		multi $t7, 4
+		mflo $t7						# $t7 <- Addresse relative de T[x][y]
+		lw $t6, 0($sp)					# $t6 <- addresse de la grille
+		add $t6, $t6, $t7				# $t6 <- addresse de l'élément à tester dans la grille
+
+		or $t2, $zero, $t4				# $t2 <- i=y
+for_pose_bat_vert:
+		lw $t6, 0($t6)					# $t6 <- élément à tester dans la grille
+		bne $t6, $zero, while_pose_bateaux # La pose est impossible, on revient au début du while
+		addi $t2, $zero, 1				# i++
+		addi $t7, $t7, 40				# T[x][y+1]
+		add $t8, $t4, $a2				# $t8 <- y + tailleBateauxAPoser
+		slt $t8, $t2, $t6				# $t8 <- i < y + tailleBateauxAPoser
+		bne $t8, $zero, for_pose_bat_hor
+
+suite_if_pose_bateaux_vert:
+		bne $t5, $zero, orientation_pose_bateaux # Si l'orientation est horizontale, on jump
+										# Sinon l'orientation est verticale
+		multi $t4, 10
+		mflo $t7
+		add $t7, $t7, $t3
+		multi $t7, 4
+		mflo $t7						# $t7 <- Addresse relative de T[x][y]
+
+		ori $t2, $zero, 0
+for_pose_bateaux_pose_ver:
+
+orientation_pose_bateaux:
+		multi $t4, 10
+		mflo $t7
+		add $t7, $t7, $t3
+		multi $t7, 4
+		mflo $t7						# $t7 <- Addresse relative de T[x][y]
+		lw $t6, 0($sp)					# $t6 <- addresse de la grille
+		add $t6, $t6, $t7				# $t6 <- addresse de l'élément à remplacer dans la grille
+
+		ori $t2, $zero, 0				# $t2 <- i=0
+for_pose_bateaux_pose_hor:
+		sw $s0, 0($t6)
+		addi $t2, $t2, 1
+		addi $t6, $t6, 4
+		slt $t8, $t2, $a2
+		
+										# On oublie pas de boucler le for
+		beq $t2, $zero, while_pose_bateaux	# tant que posePossible = false
