@@ -9,7 +9,7 @@ int main(){
 	int grille[N][N];
 	int grille2[N][N];
 	initGrille(grille);
-	int nbBateaux = remplitGrille(grille) - 1;
+	int nbBateaux = remplitGrille(grille);
 	int nbCoup = 0;
 
 	for(int e = 0; e < N; e++){ 
