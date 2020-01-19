@@ -21,6 +21,9 @@ main:
 		ori $t0, $zero, -2
 		sw $t0, 100($a0)
 
+		ori $t0, $zero, 2
+		sw $t0, 16($a0)
+
 		la $a0, grille					# Appel de affiche_grille
 		sw $a0, 0($sp)					# Sauvegarde de l'argument
 		jal affiche_grille
@@ -72,7 +75,7 @@ for_aff_grille_ligne:
 for_aff_grille_colonne:
 										# $t3 <- caractère à afficher
 			ori $t3, $zero, 126			# Code ASCII ~ = 126
-			beq $t0, $zero, suite_bat	# Si T[i][j] == 0 (on a pas touché cette case)
+			bgez $t0, suite_bat			# Si T[i][j] >= 0 (on a pas touché cette case)
 			slti $t4, $t0, -1			# Si T[i][j] == -2 (il y avait rien)
 			bne $t4, $zero si_pas_bat
 										# Si T[i][j] == -1 (il y avait un bateau)

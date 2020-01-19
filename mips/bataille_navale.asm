@@ -26,7 +26,7 @@ main:
 
 init_grille: 							# Fonction initialisant un tableau de int de taille 10x10 à 0
 										# Argument $a0 : adresse du tableau à initialiser
-		ori $t0, $zero, 0				# i=0
+		ori $t0, $zero, 0				# $t0 <- i=0
 for_init_grille:
 		sw $zero, 0($a0)				# T[i] <- 0
 		addi $t0, $t0, 1
@@ -52,7 +52,7 @@ affiche_grille:							# Fonction affichant la grille
 		ori $t1, $zero, 0				# $t1 <- ligne = 0
 
 for_aff_grille_ligne:
-		ori $a0, $zero, 124				# Affichage de |k| où k est le numéro de la ligne Code ASCII | = 124
+		ori $a0, $zero, 124				# Affichage de |k| où k est le numéro de la ligne. Code ASCII | = 124
 		ori $v0, $zero, 11				# Code service affiche caractère
 		syscall
 		or $a0, $zero, $t1
@@ -61,12 +61,13 @@ for_aff_grille_ligne:
 		ori $a0, $zero, 124	
 		ori $v0, $zero, 11
 		syscall
+
 		ori $t2, $zero, 0				# $t2 <- colonne = 0
 
 for_aff_grille_colonne:
 										# $t3 <- caractère à afficher
 			ori $t3, $zero, 126			# Code ASCII ~ = 126
-			beq $t0, $zero, suite_bat	# Si T[i][j] == 0 (on a pas touché cette case)
+			bgez $t0, suite_bat			# Si T[i][j] >= 0 (on a pas touché cette case)
 			slti $t4, $t0, -1			# Si T[i][j] == -2 (il y avait rien)
 			bne $t4, $zero si_pas_bat
 										# Si T[i][j] == -1 (il y avait un bateau)
@@ -87,7 +88,7 @@ suite_bat:
 
 			addi $t2, $t2, 1			# colonne++
 			addi $t6, $t6, 4
-			lw $t0, 0($t6)				# $t0 <- T[i++]
+			lw $t0, 0($t6)				# $t0 <- T[colonne]
 
 			slti $t5, $t2, 10			# $t5 <- colonne < 10
 			bne $t5, $zero, for_aff_grille_colonne
