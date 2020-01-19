@@ -7,14 +7,12 @@ separateur:		.asciiz " |"
 
 main:
 		subu $sp, $sp, 64				## Allocation d'un espace de 64o pour le main
-		sw $fp, 60($sp)					## Copie de $fp
 		addu $fp, $sp, 64				## Mise à jour de $fp
 
 		la $a0, grille					# Appel de init grille
-		sw $a0, 0($sp)					# Sauvegarde de l'argument(pointeur sur la grille) sur la pile
 		jal init_grille
-		lw $a0, 0($sp)					# Restauration de l'argument
 		
+		la $a0, grille
 		ori $t0, $zero, -1
 		sw $t0, 8($a0)
 
@@ -25,9 +23,7 @@ main:
 		sw $t0, 16($a0)
 
 		la $a0, grille					# Appel de affiche_grille
-		sw $a0, 0($sp)					# Sauvegarde de l'argument
 		jal affiche_grille
-		lw $a0, 0($sp)					# Restauration de l'argument
 
 		ori $v0, $zero, 10
 		syscall

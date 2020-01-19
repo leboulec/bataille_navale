@@ -8,11 +8,8 @@ main:
 		addu $fp, $sp, 64
 
 		la $a0, grille ###TEST
-		sw $a0, 0($fp)
 		jal init_grille
 
-		lw $a0, 0($fp)
-		
 		ori $v0, $zero, 10
 		syscall
 
