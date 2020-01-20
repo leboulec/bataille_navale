@@ -104,6 +104,69 @@ suite_bat:
 
 		jr $ra
 
+
+debug_affiche_grille:					# Fonction affichant tous les bateaux sur la grille
+										# Argument $a0 : adresse de la grille
+		lw $t0, 0($a0)					# $t0 <- T[0]
+		or $t6, $zero, $a0				# $t6 <- T
+
+		la $a0, bord_grille				# Affichage du bord supérieur de la grille
+		ori $v0, $zero, 4
+		syscall							
+		la $a0, numColonne
+		ori $v0, $zero, 4
+		syscall							
+
+		ori $t1, $zero, 0				# $t1 <- ligne = 0
+										# $t6 <- addresse de l'élément à afficher
+
+debug_for_aff_grille_ligne:
+		ori $a0, $zero, 124				# Affichage de |k| où k est le numéro de la ligne. Code ASCII | = 124
+		ori $v0, $zero, 11				# Code service affiche caractère
+		syscall
+		or $a0, $zero, $t1
+		ori $v0, $zero, 1
+		syscall
+		ori $a0, $zero, 124	
+		ori $v0, $zero, 11
+		syscall
+
+		ori $t2, $zero, 0				# $t2 <- colonne = 0
+
+debug_for_aff_grille_colonne:
+
+			ori $a0, $zero, 32			# Code ASCII ESPACE = 32
+			ori $v0, $zero, 11
+			syscall
+			lw $a0, 0($t6)				# élément de la grille à afficher
+			ori $v0, $zero, 1
+			syscall
+			la $a0, separateur			## " |"
+			ori $v0, $zero, 4
+			syscall
+
+			addi $t2, $t2, 1			# colonne++
+			addi $t6, $t6, 4
+			lw $t0, 0($t6)				# $t0 <- T[colonne]
+
+			slti $t5, $t2, 10			# $t5 <- colonne < 10
+			bne $t5, $zero, debug_for_aff_grille_colonne
+
+		ori $a0, $zero, 10 				# Code ASCII \n = 10
+		ori $v0, $zero, 11
+		syscall
+
+		addi $t1, $t1, 1
+		slti $t5, $t1, 10				# $t5 <- ligne < 10
+		bne $t5, $zero, debug_for_aff_grille_ligne
+										# Fin des boucles
+		la $a0, bord_grille
+		ori $v0, $zero, 4
+		syscall
+
+		jr $ra
+
+
 pose_bateaux:							# Fonction posant un nombre de bateux de même taille aléatoirement sur la grille
 										# Arguments : $a0 <- adresse de la grille, $a1 <- nombre de bateaux à poser, $a2 <- taille des bateaux à poser
 										# Retourne dans $v0 le numéro du dernier bateau posé + 1 : numéro du prochain bateau à poser
