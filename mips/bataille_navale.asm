@@ -3,6 +3,9 @@ grille:			.space 400				# Grille de 10x10
 bord_grille: 	.asciiz "___________________________________________\n"
 numColonne:		.asciiz "|.| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |\n"
 separateur:		.asciiz " |"
+nom_fichier:    .asciiz "score.txt"
+
+
 	.text
 
 main:
@@ -66,7 +69,7 @@ for_aff_grille_colonne:
 			ori $t3, $zero, 126			# Code ASCII ~ = 126
 			bgez $t0, suite_bat			# Si T[i][j] >= 0 (on a pas touché cette case)
 			slti $t4, $t0, -1			# Si T[i][j] == -2 (il y avait rien)
-			bne $t4, $zero si_pas_bat
+			bne $t4, $zero, si_pas_bat
 										# Si T[i][j] == -1 (il y avait un bateau)
 si_bat:		ori $t3, $zero, 79			# Code ASCII O = 79
 			j suite_bat
@@ -289,3 +292,57 @@ suite_if_orientation_pose_bateaux:
 		lw $fp, 60($sp)					# Restauration de $fp
 		addu $sp, $sp, 64				# Ajustement de $sp
 		jr $ra
+
+
+
+
+encore_bateau:
+
+		addi $t0, $zero, 0              # t0 <= i
+		slti $t1, $t0, 100				# t1 <=  i < 100
+
+for_eb: 
+		beq $a0, $a1, ret1              
+		addi $a0, $a0, 4				# élément suivant du tableau
+		addi $t1, $t1, 1				# t1++
+		bne $t1, $zero, for_eb 
+
+		addi $v0, $zero,0				# return 0
+		syscall
+		jr $ra
+
+ret1:   addi $v0, $zero, 1				# return 1
+		syscall
+		jr $ra
+
+
+remplit_grille:
+
+			addi $a1, $zero, 5			# préparation des arguments
+			addi $a2, $zero, 1
+			jal pose_bateaux 			# saut vers la fonction
+			or $s0, $zero, $v0          # incrémentation du nombre de bateaux
+
+			addi $a1, $zero, 4
+			jal pose_bateaux
+			or $s0, $zero, $v0
+
+			addi $a1, $zero, 3
+			addi $a2, $zero, 2
+			jal pose_bateaux
+			or $s0, $zero, $v0
+
+			addi $a1, $zero, 2
+			addi $a2, $zero, 1
+			jal pose_bateaux
+			or $s0, $zero, $v0			
+
+			add $v0, $zero, $s0 		# return nombre de bateaux
+			syscall
+
+
+
+tableau_score:
+
+			#SYSCALL 13 ou 14 ou 15 jsp encore j'ai check la doc MIPS mais jsp ce que c'est un buffer je comprends r je continuerai demain je suis fatigué
+
