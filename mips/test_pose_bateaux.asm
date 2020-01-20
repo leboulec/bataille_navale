@@ -12,10 +12,24 @@ main:
 		la $a0, grille					# Appel de init grille
 		jal init_grille
 		
-		la $a0, grille					# Appel de affiche_grille
-		jal affiche_grille
-
 		ori $s0, $zero, 1				# $s0 <- nombre total de bateaux posés + 1 ##IMPERATIF : variable utilisée par les fonctions (globale)##
+		la $a0, grille
+		ori $a1, $zero, 1
+		ori $a2, $zero, 1				# Pose d'un bateau de taille 1
+		jal pose_bateaux
+		or $s0, $zero, $v0
+
+		la $a0, grille
+		ori $a1, $zero, 1
+		ori $a2, $zero, 3				# Pose d'un bateau de taille 3
+		jal pose_bateaux
+		or $s0, $zero, $v0
+
+		la $a0, grille
+		ori $a1, $zero, 3
+		ori $a2, $zero, 5				# Pose de 3 bateaux de taille 5
+		jal pose_bateaux
+		or $s0, $zero, $v0
 
 		ori $v0, $zero, 10
 		syscall
@@ -106,7 +120,7 @@ suite_bat:
 
 pose_bateaux:							# Fonction posant un nombre de bateux de même taille aléatoirement sur la grille
 										# Arguments : $a0 <- adresse de la grille, $a1 <- nombre de bateaux à poser, $a2 <- taille des bateaux à poser
-										# Retourne dans $v0 le numéro du dernier bateau posé + 1 : numéro du prochain bateau à poser
+										# Retourne dans $v0 le numéro du dernier bateau posé + 1 : numéro du prochain bateau
 		subu $sp, $sp, 64				## Prologue
 		sw $fp, 60($sp)					##
 		addu $fp, $sp, 64				##
@@ -211,7 +225,7 @@ for_pose_bateaux_pose_hor:
 		addi $t6, $t6, 4
 		slt $t8, $t2, $a2				# i < tailleBateau
 		bne $t8, $zero, for_pose_bateaux_pose_hor
-		
+
 suite_if_orientation_pose_bateaux:
 
 		addi $t0, $t0, 1
