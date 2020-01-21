@@ -309,7 +309,7 @@ suite_if_orientation_pose_bateaux:
 
 
 
-encore_bateau:							#Fonction qui teste s'il reste des bateaux
+encore_bateau:							#Fonction qui teste s'il reste des bateaux et renvoie le nombre de bateaux restant
 										# Argument $a0 : adresse du tableau à initialiser
 
 		addi $t0, $zero, 0              # t0 <= i
