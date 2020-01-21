@@ -347,3 +347,17 @@ tableau_score:
 
 			#SYSCALL 13 ou 14 ou 15 jsp encore j'ai check la doc MIPS mais jsp ce que c'est un buffer je comprends r je continuerai demain je suis fatigué
 
+lecture_entier:
+			ori $t0, $zero, 47			# Code ASCII 0 - 1
+			ori $t1, $zero, 58			# Code ASCII 9 + 1
+while_lect_entier:
+			ori $v0, $zero, 12
+			syscall
+			slt $t2, $t0, $v0
+			slt $t3, $v0, $t1
+			and $t2, $t2, $t3			# Est-ce que le caractère rentré correspond à un nombre?
+			beq $t2, $zero, while_lect_entier
+
+			subi $v0, $v0, 48			# Conversion caractère -> entier
+
+			jr $ra
