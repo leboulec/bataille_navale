@@ -1,5 +1,5 @@
 	.data
-grille:			.space 400				# Grille de 10x10
+grille:			.space 400				# Grille de 10x10 entiers
 bord_grille: 	.asciiz "___________________________________________\n"
 numColonne:		.asciiz "|.| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |\n"
 separateur:		.asciiz " |"
