@@ -5,6 +5,7 @@ numColonne:		.asciiz "|.| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |\n"
 separateur:		.asciiz " |"
 nom_fichier:    .asciiz "score.txt"
 erreur_lecture: .asciiz "\nErreur : veuillez rentrer une valeur correcte\n"
+indice_bateau:	.word 1					# Variable statique utilisé par pose_bateau
 
 	.text
 
@@ -177,7 +178,7 @@ pose_bateaux:							# Fonction posant un nombre de bateux de même taille aléat
 		sw $fp, 60($sp)					##
 		addu $fp, $sp, 64				##
 		sw $a0, 0($sp)					# Sauvegarde de l'adresse de la grille
-		sw $s0, 4($sp)					# Sauvegarde du nombre de bateaux total sur la grille	###A RESTAURER IMPERATIVEMENT###
+		sw $s0, 4($sp)					# Sauvegarde de $s0										###A RESTAURER IMPERATIVEMENT### ###PAS FORCEMENT UTILE###
 		sw $s1, 8($sp)					# Sauvegarde de $s1										###A RESTAURER IMPERATIVEMENT###
 		or $t1, $zero, $a1				# $t1 <- nombre de bateaux à poser
 
@@ -258,7 +259,9 @@ suite_if_pose_bateaux_vert:
 		add $t6, $t6, $s1				# $t6 <- addresse de l'élément à remplacer dans la grille
 		ori $t2, $zero, 0				# $t2 <- i=0
 for_pose_bateaux_pose_ver:
-		sw $s0, 0($t6)					# On remplace dans la grille avec le numéro du bateau
+		la $t8, indice_bateau
+		lw $t8, 0($t8)
+		sw $t8, 0($t6)					# On remplace dans la grille avec le numéro du bateau
 		addi $t2, $t2, 1
 		addi $t6, $t6, 40
 		slt $t8, $t2, $a2				# i < tailleBateau
@@ -272,7 +275,9 @@ orientation_pose_bateaux:
 		add $t6, $t6, $s1				# $t6 <- addresse de l'élément à tester dans la grille
 		ori $t2, $zero, 0				# $t2 <- i=0
 for_pose_bateaux_pose_hor:
-		sw $s0, 0($t6)					# On remplace dans la grille avec le numéro du bateau
+		la $t8, indice_bateau
+		lw $t8, 0($t8)
+		sw $t8, 0($t6)					# On remplace dans la grille avec le numéro du bateau
 		addi $t2, $t2, 1
 		addi $t6, $t6, 4
 		slt $t8, $t2, $a2				# i < tailleBateau
@@ -281,12 +286,16 @@ for_pose_bateaux_pose_hor:
 suite_if_orientation_pose_bateaux:
 
 		addi $t0, $t0, 1
-		addi $s0, $s0, 1				# Un bateau posé : on passe à l'indice suivant
+		la $t8, indice_bateau
+		lw $t7, 0($t8)
+		addi $t7, $t7, 1
+		sw $t7, 0(t8)					# Un bateau est posé, on passe à l'indice suivant
 		slt $t8, $t0, $t1				# i < nbBateauxAPoser
 		bne $t8, $zero, for_pose_bateaux
 
 										# EPILOGUE
-		or $v0, $zero, $s0				# Retourne le numéro du dernier bateau posé
+		la $t0, indice_bateau
+		lw $v0, 0($t0)					# Retourne le numéro du dernier bateau posé
 		lw $s0, 4($sp)					# Restauration de $s0
 		lw $s1, 8($sp)					# Restauration de $s1
 		lw $fp, 60($sp)					# Restauration de $fp
@@ -321,23 +330,20 @@ remplit_grille:
 			addi $a1, $zero, 5			# préparation des arguments
 			addi $a2, $zero, 1
 			jal pose_bateaux 			# saut vers la fonction
-			or $s0, $zero, $v0          # incrémentation du nombre de bateaux
 
 			addi $a1, $zero, 4
 			jal pose_bateaux
-			or $s0, $zero, $v0
 
 			addi $a1, $zero, 3
 			addi $a2, $zero, 2
 			jal pose_bateaux
-			or $s0, $zero, $v0
 
 			addi $a1, $zero, 2
 			addi $a2, $zero, 1
 			jal pose_bateaux
-			or $s0, $zero, $v0			
+			or $t0, $zero, $v0		# Récupération de l'indice du dernier bateau
 
-			add $v0, $zero, $s0 		# return nombre de bateaux
+			subi $v0, $t0, 1 		# return nombre de bateaux
 			syscall
 
 			jr $ra
@@ -366,3 +372,7 @@ while_lect_entier:
 			subi $v0, $v0, 48			# Conversion caractère -> entier
 
 			jr $ra
+
+tire:									# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur
+										# Arguments : $a0 <- addresse de la grille, $a1 <- addresse du nombre de bateaux restant
+
