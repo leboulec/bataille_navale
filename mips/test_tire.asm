@@ -21,9 +21,19 @@ main:
 		la $a0, grille					# Appel de init grille
 		jal init_grille
 		
-		la $a0, grille					# Appel de affiche_grille
-		jal affiche_grille
+		ori $t0, $zero, 1
+		la $a0, grille
+		sw $t0, 0($a0)
+		sw $t0, 4($a0)
 
+		la $a0, grille
+		jal tire
+
+		la $a0, grille
+		jal tire
+
+		la $a0, grille
+		jal debug_affiche_grille
 
 		ori $v0, $zero, 10
 		syscall
@@ -398,46 +408,48 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 			sw $a0, 4($sp)
 			sw $a1, 8($sp)				# Sauvegarde des arguments
 			sw $ra, 12($sp)				# Sauvegarde de $ra
+			sw $s0, 16($sp)
+			sw $s1, 20($sp)				# Sauvegarde de $s0 et $s1
 
 			la $a0, question_ligne
 			ori $v0, $zero, 4
 			syscall						# Affichage de "Ligne : "
 
 			jal lecture_entier
-			or $t0, $zero, $v0			# $t0 <- ligne
+			or $s0, $zero, $v0			# $s0 <- ligne
 
 			la $a0, question_col
 			ori $v0, $zero, 4
 			syscall						# Affichage de "Colonne : "
 
 			jal lecture_entier
-			or $t1, $zero, $v0			# $t1 <- colonne
+			or $s1, $zero, $v0			# $s1 <- colonne
 
 			lw $a0, 4($sp)
 			lw $a1, 8($sp)				# Restauration des arguments
 
 			ori $t2, $zero, 10
-			mult $t0, $t2
+			mult $s0, $t2
 			mflo $t2
-			add $t2, $t2, $t1
+			add $t2, $t2, $s1
 			ori $t3, $zero, 4
 			mult $t2, $t3
 			mflo $t2					# $t2 <- adresse relative de la case
-			add $t2, $a0, $t2			# $t2 <- adresse de la case
+			add $s2, $a0, $t2			# $s2 <- adresse de la case
 
-			lw $t3, 0($t2)				# $t3 <- contenu de la case
+			lw $t3, 0($s2)				# $t3 <- contenu de la case
 
 			bgtz $t3, tire_bateau_present	# Si un bateau est présent sur cette case
 										# Sinon il n'y a pas de bateau
 			ori $t4, $zero, -2
-			sw $t4, 0($t2)				# On met -2 dans la case
+			sw $t4, 0($s2)				# On met -2 dans la case
 			la $a0, plouf
 			ori $v0, $zero, 4
 			syscall						# Affichage de plouf!
 			j tire_bateau_suite
 tire_bateau_present:
 			ori $t4, $zero, -1
-			sw $t4, 0($t2)				# On met -1 dans la case
+			sw $t4, 0($s2)				# On met -1 dans la case
 
 			la $a0, 4($sp)
 			or $a1, $zero, $t3
@@ -461,6 +473,8 @@ tire_coule_suite:
 tire_bateau_suite:
 			lw $ra, 12($sp)
 			lw $fp, 60($sp)					# Restauration de $fp
+			lw $s0, 16($sp)
+			lw $s1, 20($sp)					# Restauration de $s0 et $s1
 			addu $sp, $sp, 64				# Ajustement de $sp
 
 			jr $ra
