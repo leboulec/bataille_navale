@@ -340,6 +340,7 @@ remplit_grille:
 			add $v0, $zero, $s0 		# return nombre de bateaux
 			syscall
 
+			jr $ra
 
 
 tableau_score:
