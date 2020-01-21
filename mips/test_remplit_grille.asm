@@ -16,10 +16,16 @@ main:
 		la $a0, grille					# Appel de init grille
 		jal init_grille
 		
-		la $a0, grille					# Appel de affiche_grille
-		jal affiche_grille
 
+		la $a0, grille
+		jal remplit_grille	
+		or $a0, $zero, $v0
+		ori $v0, $zero, 1
+		syscall
 
+		la $a0, grille
+		jal debug_affiche_grille
+		
 		ori $v0, $zero, 10
 		syscall
 
@@ -336,25 +342,25 @@ remplit_grille:
 			addi $a2, $zero, 5
 			jal pose_bateaux 			# saut vers la fonction
 
-		lw $a0, 0($sp)
+			lw $a0, 0($sp)
 			addi $a1, $zero, 1
-		addi $a2, $zero, 4
+			addi $a2, $zero, 4
 			jal pose_bateaux
 
-		lw $a0, 0($sp)
+			lw $a0, 0($sp)
 			addi $a1, $zero, 2
 			addi $a2, $zero, 3
 			jal pose_bateaux
 
-		lw $a0, 0($sp)
+			lw $a0, 0($sp)
 			addi $a1, $zero, 1
 			addi $a2, $zero, 2
 			jal pose_bateaux
 			or $t0, $zero, $v0		# Récupération de l'indice du dernier bateau
 
 			subi $v0, $t0, 1 		# return nombre de bateaux
-			#syscall					###WTF le syscall?###
-		lw $ra, 4($sp)			# restauration de $ra
+			#syscall
+			lw $ra, 4($sp)			# restauration de $ra
 			jr $ra
 
 
