@@ -3,6 +3,7 @@ grille:			.space 400				# Grille de 10x10
 bord_grille: 	.asciiz "___________________________________________\n"
 numColonne:		.asciiz "|.| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |\n"
 separateur:		.asciiz " |"
+indice_bateau: 	.word 1
 	.text
 
 main:
@@ -189,15 +190,14 @@ debug_for_aff_grille_colonne:
 
 		jr $ra
 
-
 pose_bateaux:							# Fonction posant un nombre de bateux de même taille aléatoirement sur la grille
 										# Arguments : $a0 <- adresse de la grille, $a1 <- nombre de bateaux à poser, $a2 <- taille des bateaux à poser
-										# Retourne dans $v0 le numéro du dernier bateau posé + 1 : numéro du prochain bateau
+										# Retourne dans $v0 le numéro du dernier bateau posé + 1 : numéro du prochain bateau à poser
 		subu $sp, $sp, 64				## Prologue
 		sw $fp, 60($sp)					##
 		addu $fp, $sp, 64				##
 		sw $a0, 0($sp)					# Sauvegarde de l'adresse de la grille
-		sw $s0, 4($sp)					# Sauvegarde du nombre de bateaux total sur la grille	###A RESTAURER IMPERATIVEMENT###
+		sw $s0, 4($sp)					# Sauvegarde de $s0										###A RESTAURER IMPERATIVEMENT### ###PAS FORCEMENT UTILE###
 		sw $s1, 8($sp)					# Sauvegarde de $s1										###A RESTAURER IMPERATIVEMENT###
 		or $t1, $zero, $a1				# $t1 <- nombre de bateaux à poser
 
@@ -278,7 +278,9 @@ suite_if_pose_bateaux_vert:
 		add $t6, $t6, $s1				# $t6 <- addresse de l'élément à remplacer dans la grille
 		ori $t2, $zero, 0				# $t2 <- i=0
 for_pose_bateaux_pose_ver:
-		sw $s0, 0($t6)					# On remplace dans la grille avec le numéro du bateau
+		la $t8, indice_bateau
+		lw $t8, 0($t8)
+		sw $t8, 0($t6)					# On remplace dans la grille avec le numéro du bateau
 		addi $t2, $t2, 1
 		addi $t6, $t6, 40
 		slt $t8, $t2, $a2				# i < tailleBateau
@@ -292,21 +294,27 @@ orientation_pose_bateaux:
 		add $t6, $t6, $s1				# $t6 <- addresse de l'élément à tester dans la grille
 		ori $t2, $zero, 0				# $t2 <- i=0
 for_pose_bateaux_pose_hor:
-		sw $s0, 0($t6)					# On remplace dans la grille avec le numéro du bateau
+		la $t8, indice_bateau
+		lw $t8, 0($t8)
+		sw $t8, 0($t6)					# On remplace dans la grille avec le numéro du bateau
 		addi $t2, $t2, 1
 		addi $t6, $t6, 4
 		slt $t8, $t2, $a2				# i < tailleBateau
 		bne $t8, $zero, for_pose_bateaux_pose_hor
-
+		
 suite_if_orientation_pose_bateaux:
 
 		addi $t0, $t0, 1
-		addi $s0, $s0, 1				# Un bateau posé : on passe à l'indice suivant
+		la $t8, indice_bateau
+		lw $t7, 0($t8)
+		addi $t7, $t7, 1
+		sw $t7, 0($t8)					# Un bateau est posé, on passe à l'indice suivant
 		slt $t8, $t0, $t1				# i < nbBateauxAPoser
 		bne $t8, $zero, for_pose_bateaux
 
 										# EPILOGUE
-		or $v0, $zero, $s0				# Retourne le numéro du dernier bateau posé
+		la $t0, indice_bateau
+		lw $v0, 0($t0)					# Retourne le numéro du dernier bateau posé
 		lw $s0, 4($sp)					# Restauration de $s0
 		lw $s1, 8($sp)					# Restauration de $s1
 		lw $fp, 60($sp)					# Restauration de $fp
