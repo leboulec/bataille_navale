@@ -309,23 +309,22 @@ suite_if_orientation_pose_bateaux:
 
 
 
-encore_bateau:
+encore_bateau:							#Fonction qui teste s'il reste des bateaux et renvoie le nombre de bateaux restant
+										# Argument $a0 : adresse du tableau à initialiser
 
 		addi $t0, $zero, 0              # t0 <= i
-		slti $t1, $t0, 100				# t1 <=  i < 100
 
 for_eb: 
+		slti $t1, $t0, 100				# t1 <=  i < 100
 		beq $a0, $a1, ret1              
 		addi $a0, $a0, 4				# élément suivant du tableau
-		addi $t1, $t1, 1				# t1++
+		addi $t0, $t0, 1				# t0++
 		bne $t1, $zero, for_eb 
 
 		addi $v0, $zero,0				# return 0
-		syscall
 		jr $ra
 
 ret1:   addi $v0, $zero, 1				# return 1
-		syscall
 		jr $ra
 
 
@@ -337,30 +336,29 @@ remplit_grille:
 		sw $a0, 0($sp)
 		sw $ra, 4($sp)					# Sauvegarde de $ra
 
-			addi $a1, $zero, 1			# préparation des arguments
-			addi $a2, $zero, 5
-			jal pose_bateaux 			# saut vers la fonction
+		addi $a1, $zero, 1				# préparation des arguments
+		addi $a2, $zero, 5
+		jal pose_bateaux 				# saut vers la fonction
 
 		lw $a0, 0($sp)
-			addi $a1, $zero, 1
+		addi $a1, $zero, 1
 		addi $a2, $zero, 4
-			jal pose_bateaux
+		jal pose_bateaux
 
 		lw $a0, 0($sp)
-			addi $a1, $zero, 2
-			addi $a2, $zero, 3
-			jal pose_bateaux
+		addi $a1, $zero, 2
+		addi $a2, $zero, 3
+		jal pose_bateaux
 
 		lw $a0, 0($sp)
-			addi $a1, $zero, 1
-			addi $a2, $zero, 2
-			jal pose_bateaux
-			or $t0, $zero, $v0		# Récupération de l'indice du dernier bateau
+		addi $a1, $zero, 1
+		addi $a2, $zero, 2
+		jal pose_bateaux
+		or $t0, $zero, $v0				# Récupération de l'indice du dernier bateau
 
-			subi $v0, $t0, 1 		# return nombre de bateaux
-			#syscall					###WTF le syscall?###
-		lw $ra, 4($sp)			# restauration de $ra
-			jr $ra
+		subi $v0, $t0, 1 				# return nombre de bateaux
+		lw $ra, 4($sp)					# restauration de $ra
+		jr $ra
 		lw $fp, 60($sp)					# Restauration de $fp
 		addu $sp, $sp, 64				# Ajustement de $sp
 
@@ -435,6 +433,7 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 			ori $v0, $zero, 4
 			syscall						# Affichage de plouf!
 			j tire_bateau_suite
+
 tire_bateau_present:
 			ori $t4, $zero, -1
 			sw $t4, 0($t2)				# On met -1 dans la case
