@@ -28,6 +28,9 @@ main:
 
 		la $a0, grille
 		jal tire
+		
+		la $a0, grille
+		jal debug_affiche_grille
 
 		la $a0, grille
 		jal tire
