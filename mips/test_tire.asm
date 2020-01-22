@@ -321,15 +321,17 @@ suite_if_orientation_pose_bateaux:
 
 
 
-encore_bateau:							#Fonction qui teste s'il reste des bateaux et renvoie le nombre de bateaux restant
+encore_bateau:							#Fonction qui teste s'il reste des bateaux
 										# Argument $a0 : adresse du tableau à initialiser
 
 		addi $t0, $zero, 0              # t0 <= i
+		lw $t2, 0($a0)
+		lw $t3, 0($a1)
 
-for_eb: 
+for_eb: 	
 		slti $t1, $t0, 100				# t1 <=  i < 100
-		beq $a0, $a1, ret1              
-		addi $a0, $a0, 4				# élément suivant du tableau
+		beq $a0, $t3, ret1              				
+		lw $t2, 4($a0)					# élément suivant du tableau
 		addi $t0, $t0, 1				# t0++
 		bne $t1, $zero, for_eb 
 
@@ -338,6 +340,7 @@ for_eb:
 
 ret1:   addi $v0, $zero, 1				# return 1
 		jr $ra
+
 
 
 remplit_grille:
@@ -448,7 +451,9 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 			ori $v0, $zero, 4
 			syscall						# Affichage de plouf!
 			j tire_bateau_suite
+
 tire_bateau_present:
+
 			ori $t4, $zero, -1
 			sw $t4, 0($s2)				# On met -1 dans la case
 
