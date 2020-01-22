@@ -13,30 +13,42 @@ main:
 		la $a0, grille					# Appel de init grille
 		jal init_grille
 		
-		ori $s0, $zero, 1				# $s0 <- nombre total de bateaux posés + 1 ##IMPERATIF : variable utilisée par les fonctions (globale)##
 		la $a0, grille
 		ori $a1, $zero, 1
 		ori $a2, $zero, 1				# Pose d'un bateau de taille 1
 		jal pose_bateaux
-		or $s0, $zero, $v0
+
+		la $a0, grille					# Appel de debug_affiche_grille
+		jal debug_affiche_grille
 
 		la $a0, grille
 		ori $a1, $zero, 1
 		ori $a2, $zero, 3				# Pose d'un bateau de taille 3
 		jal pose_bateaux
-		or $s0, $zero, $v0
+
+		la $a0, grille					# Appel de debug_affiche_grille
+		jal debug_affiche_grille
 
 		la $a0, grille
 		ori $a1, $zero, 3
 		ori $a2, $zero, 5				# Pose de 3 bateaux de taille 5
 		jal pose_bateaux
-		or $s0, $zero, $v0
+
+		la $a0, grille					# Appel de debug_affiche_grille
+		jal debug_affiche_grille
 
 		la $a0, grille
-		ori $a1, $zero, 4
-		ori $a2, $zero, 2				# Pose de 4 bateaux de taille 2
+		ori $a1, $zero, 3
+		ori $a2, $zero, 2				# Pose de 3 bateaux de taille 2
 		jal pose_bateaux
-		or $s0, $zero, $v0
+
+		la $a0, grille					# Appel de debug_affiche_grille
+		jal debug_affiche_grille
+
+		la $a0, grille
+		ori $a1, $zero, 1
+		ori $a2, $zero, 10
+		jal pose_bateaux
 
 		la $a0, grille					# Appel de debug_affiche_grille
 		jal debug_affiche_grille
