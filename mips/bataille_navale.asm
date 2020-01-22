@@ -440,7 +440,7 @@ tire_bateau_present:
 			ori $t4, $zero, -1
 			sw $t4, 0($t2)				# On met -1 dans la case
 
-			la $a0, 4($sp)
+			lw $a0, 4($sp)
 			or $a1, $zero, $t3
 			jal encore_bateau			# Appel de encore_bateau(grille, indiceBateau)
 			or $t5, $zero, $v0			# $t5 <- il y a encore un bateau

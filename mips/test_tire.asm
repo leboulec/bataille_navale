@@ -321,8 +321,8 @@ suite_if_orientation_pose_bateaux:
 
 
 
-encore_bateau:							#Fonction qui teste s'il reste des bateaux
-								# Argument $a0 : adresse du tableau à initialiser
+encore_bateau:							# Fonction qui teste s'il reste le bateau d'indice donné
+										# Argument $a0 : adresse de la grille, $a1 indice du bateau
 
 		addi $t0, $zero, 0              		# t0 <= i
 		lw $t2, 0($a0)
@@ -456,7 +456,7 @@ tire_bateau_present:
 			ori $t4, $zero, -1
 			sw $t4, 0($s2)				# On met -1 dans la case
 
-			la $a0, 4($sp)
+			lw $a0, 4($sp)
 			or $a1, $zero, $t3
 			jal encore_bateau			# Appel de encore_bateau(grille, indiceBateau)
 			or $t5, $zero, $v0			# $t5 <- il y a encore un bateau
