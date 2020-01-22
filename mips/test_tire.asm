@@ -329,8 +329,9 @@ encore_bateau:							# Fonction qui teste s'il reste le bateau d'indice donné
 
 for_eb: 	
 		slti $t1, $t0, 100				# t1 <=  i < 100
-		beq $t2, $a1, ret1              				
-		lw $t2, 4($a0)					# élément suivant du tableau
+		beq $t2, $a1, ret1   
+		addi $a0, $a0, 4           				
+		lw $t2, 0($a0)					# élément suivant du tableau
 		addi $t0, $t0, 1				# t0++
 		bne $t1, $zero, for_eb 
 
