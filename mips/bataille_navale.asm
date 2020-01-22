@@ -309,16 +309,17 @@ suite_if_orientation_pose_bateaux:
 
 
 
-encore_bateau:							#Fonction qui teste s'il reste des bateaux
-								# Argument $a0 : adresse du tableau à initialiser
+encore_bateau:							# Fonction qui teste s'il reste le bateau d'indice donné
+										# Argument $a0 : adresse de la grille, $a1 indice du bateau
 
 		addi $t0, $zero, 0              		# t0 <= i
 		lw $t2, 0($a0)
 
 for_eb: 	
 		slti $t1, $t0, 100				# t1 <=  i < 100
-		beq $a0, $a1, ret1              				
-		lw $t2, 4($a0)					# élément suivant du tableau
+		beq $t2, $a1, ret1   
+		addi $a0, $a0, 4           				
+		lw $t2, 0($a0)					# élément suivant du tableau
 		addi $t0, $t0, 1				# t0++
 		bne $t1, $zero, for_eb 
 
