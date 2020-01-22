@@ -8,9 +8,13 @@ erreur_lecture: .asciiz "\nErreur : veuillez entrer une valeur correcte\n"
 indice_bateau:	.word 1					# Variable statique utilisé par pose_bateaux
 question_ligne:	.asciiz "Entrer le numero de la ligne : "
 question_col:	.asciiz "\nEntrer le numero de la colonne : "
-plouf:			.asciiz "Plouf!\n"
-touche:			.asciiz "Touche!\n"
-coule:			.asciiz "Coule!\n"
+plouf:			.asciiz "\nPlouf!\n"
+touche:			.asciiz "\nTouche!\n"
+coule:			.asciiz "\nCoule!\n"
+reste:			.asciiz "Il reste "
+bateaux:		.asciiz " bateaux\n"
+bravo:			.asciiz "Bravo ! Vous avez gagné en "
+coups:			.asciiz "coups\n"
 
 	.text
 
@@ -24,8 +28,57 @@ main:
 		la $a0, grille					# Appel de affiche_grille
 		jal affiche_grille
 
+		la $a0, grille 					# Appel de remplit_grille
+		jal remplit_grille 	
 
-		ori $v0, $zero, 10
+		add $t1, $zero, $zero 			# t1 <= nombre de coups
+		addi $t0, $v0, 1				# t0 <= nbBateaux
+
+while_main: 
+
+		la $a0, grille
+		add $a1, $t0, $zero
+		jal tire                     	# Appel de tire
+
+		add $t0, $v0, $zero 			# nbBateau	
+
+		la $a0, reste 					# Affiche "il reste"
+		addi $v0, $zero, 4
+		syscall
+		
+		add $a0, $t0, $zero 			# Affiche nbBateau
+		addi $v0, $zero, 1
+		syscall  
+
+		la $a0, bateaux 				# Affiche "bateaux"
+		addi $v0, $zero, 4
+		syscall
+
+		la $a0, grille 					# Appel de affiche_grille
+		jal affiche_grille
+
+		addi $t1, $t1, 1 				# nb_coups ++
+		
+		bne $t0, $zero, while_main		# Si nbBateau != 0 goto while_main
+
+
+
+		la $a0, bravo 					# Affiche "Bravo ! Vous avez gagné en"
+		addi $v0, $zero, 4
+		syscall
+
+		add $a0, $t1, $zero 			# Affiche nb_coups
+		addi $v0, $zero, 1
+		syscall  
+
+		la $a0, coups 					# Affiche "coups"
+		addi $v0, $zero, 4
+		syscall
+
+		la $a0, grille 					# Affiche la grille cachée
+		jal debug_affiche_grille
+
+		ori $v0, $zero, 10 				# Exit
 		syscall
 
 
