@@ -8,9 +8,9 @@ erreur_lecture: .asciiz "\nErreur : veuillez entrer une valeur correcte\n"
 indice_bateau:	.word 1					# Variable statique utilisé par pose_bateaux
 question_ligne:	.asciiz "Entrer le numero de la ligne : "
 question_col:	.asciiz "\nEntrer le numero de la colonne : "
-plouf:			.asciiz "Plouf!\n"
-touche:			.asciiz "Touche!\n"
-coule:			.asciiz "Coule!\n"
+plouf:			.asciiz "\nPlouf!\n"
+touche:			.asciiz "\nTouche!\n"
+coule:			.asciiz "\nCoule!\n"
 
 	.text
 
@@ -322,15 +322,14 @@ suite_if_orientation_pose_bateaux:
 
 
 encore_bateau:							#Fonction qui teste s'il reste des bateaux
-										# Argument $a0 : adresse du tableau à initialiser
+								# Argument $a0 : adresse du tableau à initialiser
 
-		addi $t0, $zero, 0              # t0 <= i
+		addi $t0, $zero, 0              		# t0 <= i
 		lw $t2, 0($a0)
-		lw $t3, 0($a1)
 
 for_eb: 	
 		slti $t1, $t0, 100				# t1 <=  i < 100
-		beq $a0, $t3, ret1              				
+		beq $t2, $a1, ret1              				
 		lw $t2, 4($a0)					# élément suivant du tableau
 		addi $t0, $t0, 1				# t0++
 		bne $t1, $zero, for_eb 
@@ -338,7 +337,7 @@ for_eb:
 		addi $v0, $zero,0				# return 0
 		jr $ra
 
-ret1:   addi $v0, $zero, 1				# return 1
+ret1:   	addi $v0, $zero, 1				# return 1
 		jr $ra
 
 
@@ -372,7 +371,7 @@ remplit_grille:
 			or $t0, $zero, $v0		# Récupération de l'indice du dernier bateau
 
 			subi $v0, $t0, 1 		# return nombre de bateaux
-			#syscall					###WTF le syscall?###
+								
 		lw $ra, 4($sp)			# restauration de $ra
 			jr $ra
 		lw $fp, 60($sp)					# Restauration de $fp
