@@ -199,6 +199,8 @@ void tire(int grille[N][N], int* nbBateaux){
 			printf("Coulé !\n");
 			*nbBateaux -= 1;
 		}
+	} else if(contenuCase == -1){
+		printf("Déjà touché\n");
 	} else {
 		grille[x][y] = -2;
 		printf("Plouf !\n");
