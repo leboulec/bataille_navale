@@ -14,7 +14,7 @@ coule:			.asciiz "\nCoule!\n"
 reste:			.asciiz "Il reste "
 bateaux:		.asciiz " bateaux\n"
 bravo:			.asciiz "Bravo ! Vous avez gagné en "
-coups:			.asciiz "coups\n"
+coups:			.asciiz " coups\n"
 nombreBateaux:	.word 0
 
 	.text
@@ -32,22 +32,19 @@ main:
 		la $a0, grille 					# Appel de remplit_grille
 		jal remplit_grille 	
 
-		la $a0, grille
-		jal debug_affiche_grille
-
 		or $s1, $zero, $zero 			# s1 <= nombre de coups
 		or $t0, $zero, $v0				# t0 <= nbBateaux
 		la $s0, nombreBateaux
 		sw $t0, 0($s0)					# Sauvegarde du nombre de bateaux
+
+		la $a0, grille
+		jal debug_affiche_grille
 
 while_main: 
 
 		la $a0, grille
 		add $a1, $s0, $zero
 		jal tire                     	# Appel de tire
-
-		or $t0, $v0, $zero 				# nbBateau	
-		sw $t0, 0($s0)
 
 		la $a0, reste 					# Affiche "il reste"
 		addi $v0, $zero, 4
@@ -516,6 +513,7 @@ tire_bateau_present:
 			j tire_coule_suite
 tire_coule:
 			la $a0, coule
+			lw $a1, 8($sp)
 			lw $t6, 0($a1)
 			subi $t6, $t6, 1
 			sw $t6, 0($a1)				# *nbBateaux--;
