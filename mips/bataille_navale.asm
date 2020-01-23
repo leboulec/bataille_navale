@@ -38,25 +38,22 @@ main:
 		la $s0, nombreBateaux
 		sw $t0, 0($s0)					# Sauvegarde du nombre de bateaux
 
-		la $a0, grille
-		jal debug_affiche_grille
-
 while_main: 
 
 		la $a0, grille
-		add $a1, $s0, $zero
+		or $a1, $zero, $s0
 		jal tire                     	# Appel de tire
 
 		la $a0, reste 					# Affiche "il reste"
-		addi $v0, $zero, 4
+		ori $v0, $zero, 4
 		syscall
 		
 		lw $a0, 0($s0)
-		addi $v0, $zero, 1
+		ori $v0, $zero, 1
 		syscall  						# Affiche nbBateaux
 
 		la $a0, bateaux 				# Affiche "bateaux"
-		addi $v0, $zero, 4
+		ori $v0, $zero, 4
 		syscall
 
 		la $a0, grille 					# Appel de affiche_grille
@@ -70,15 +67,15 @@ while_main:
 
 
 		la $a0, bravo 					# Affiche "Bravo ! Vous avez gagné en"
-		addi $v0, $zero, 4
+		ori $v0, $zero, 4
 		syscall
 
-		add $a0, $s1, $zero 			# Affiche nb_coups
-		addi $v0, $zero, 1
+		or $a0, $zero, $s1 				# Affiche nb_coups
+		ori $v0, $zero, 1
 		syscall  
 
 		la $a0, coups 					# Affiche "coups"
-		addi $v0, $zero, 4
+		ori $v0, $zero, 4
 		syscall
 
 		la $a0, grille 					# Affiche la grille cachée
