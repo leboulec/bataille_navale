@@ -15,6 +15,7 @@ reste:			.asciiz "Il reste "
 bateaux:		.asciiz " bateaux\n"
 bravo:			.asciiz "Bravo ! Vous avez gagné en "
 coups:			.asciiz "coups\n"
+nombreBateaux:	.word 0
 
 	.text
 
@@ -31,24 +32,30 @@ main:
 		la $a0, grille 					# Appel de remplit_grille
 		jal remplit_grille 	
 
-		add $t1, $zero, $zero 			# t1 <= nombre de coups
-		addi $t0, $v0, 1				# t0 <= nbBateaux
+		la $a0, grille
+		jal debug_affiche_grille
+
+		or $s1, $zero, $zero 			# s1 <= nombre de coups
+		or $t0, $zero, $v0				# t0 <= nbBateaux
+		la $s0, nombreBateaux
+		sw $t0, 0($s0)					# Sauvegarde du nombre de bateaux
 
 while_main: 
 
 		la $a0, grille
-		add $a1, $t0, $zero
+		add $a1, $s0, $zero
 		jal tire                     	# Appel de tire
 
-		add $t0, $v0, $zero 			# nbBateau	
+		or $t0, $v0, $zero 				# nbBateau	
+		sw $t0, 0($s0)
 
 		la $a0, reste 					# Affiche "il reste"
 		addi $v0, $zero, 4
 		syscall
 		
-		add $a0, $t0, $zero 			# Affiche nbBateau
+		lw $a0, 0($s0)
 		addi $v0, $zero, 1
-		syscall  
+		syscall  						# Affiche nbBateaux
 
 		la $a0, bateaux 				# Affiche "bateaux"
 		addi $v0, $zero, 4
@@ -57,8 +64,9 @@ while_main:
 		la $a0, grille 					# Appel de affiche_grille
 		jal affiche_grille
 
-		addi $t1, $t1, 1 				# nb_coups ++
+		addi $s1, $s1, 1 				# nb_coups ++
 		
+		lw $t0, 0($s0)
 		bne $t0, $zero, while_main		# Si nbBateau != 0 goto while_main
 
 
@@ -67,7 +75,7 @@ while_main:
 		addi $v0, $zero, 4
 		syscall
 
-		add $a0, $t1, $zero 			# Affiche nb_coups
+		add $a0, $s1, $zero 			# Affiche nb_coups
 		addi $v0, $zero, 1
 		syscall  
 
@@ -452,47 +460,50 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 			sw $a0, 4($sp)
 			sw $a1, 8($sp)				# Sauvegarde des arguments
 			sw $ra, 12($sp)				# Sauvegarde de $ra
+			sw $s0, 16($sp)
+			sw $s1, 20($sp)				# Sauvegarde de $s0 et $s1
 
 			la $a0, question_ligne
 			ori $v0, $zero, 4
 			syscall						# Affichage de "Ligne : "
 
 			jal lecture_entier
-			or $t0, $zero, $v0			# $t0 <- ligne
+			or $s0, $zero, $v0			# $s0 <- ligne
 
 			la $a0, question_col
 			ori $v0, $zero, 4
 			syscall						# Affichage de "Colonne : "
 
 			jal lecture_entier
-			or $t1, $zero, $v0			# $t1 <- colonne
+			or $s1, $zero, $v0			# $s1 <- colonne
 
 			lw $a0, 4($sp)
 			lw $a1, 8($sp)				# Restauration des arguments
 
 			ori $t2, $zero, 10
-			mult $t0, $t2
+			mult $s0, $t2
 			mflo $t2
-			add $t2, $t2, $t1
+			add $t2, $t2, $s1
 			ori $t3, $zero, 4
 			mult $t2, $t3
 			mflo $t2					# $t2 <- adresse relative de la case
-			add $t2, $a0, $t2			# $t2 <- adresse de la case
+			add $s2, $a0, $t2			# $s2 <- adresse de la case
 
-			lw $t3, 0($t2)				# $t3 <- contenu de la case
+			lw $t3, 0($s2)				# $t3 <- contenu de la case
 
 			bgtz $t3, tire_bateau_present	# Si un bateau est présent sur cette case
 										# Sinon il n'y a pas de bateau
 			ori $t4, $zero, -2
-			sw $t4, 0($t2)				# On met -2 dans la case
+			sw $t4, 0($s2)				# On met -2 dans la case
 			la $a0, plouf
 			ori $v0, $zero, 4
 			syscall						# Affichage de plouf!
 			j tire_bateau_suite
 
 tire_bateau_present:
+
 			ori $t4, $zero, -1
-			sw $t4, 0($t2)				# On met -1 dans la case
+			sw $t4, 0($s2)				# On met -1 dans la case
 
 			lw $a0, 4($sp)
 			or $a1, $zero, $t3
@@ -516,6 +527,8 @@ tire_coule_suite:
 tire_bateau_suite:
 			lw $ra, 12($sp)
 			lw $fp, 60($sp)					# Restauration de $fp
+			lw $s0, 16($sp)
+			lw $s1, 20($sp)					# Restauration de $s0 et $s1
 			addu $sp, $sp, 64				# Ajustement de $sp
 
 			jr $ra
