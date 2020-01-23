@@ -11,6 +11,7 @@ question_col:	.asciiz "\nEntrer le numero de la colonne : "
 plouf:			.asciiz "\nPlouf!\n"
 touche:			.asciiz "\nTouche!\n"
 coule:			.asciiz "\nCoule!\n"
+deja_touche:	.asciiz "\nDeja touche\n"
 reste:			.asciiz "Il reste "
 bateaux:		.asciiz " bateaux\n"
 bravo:			.asciiz "Bravo ! Vous avez gagné en "
@@ -490,9 +491,19 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 
 			bgtz $t3, tire_bateau_present	# Si un bateau est présent sur cette case
 										# Sinon il n'y a pas de bateau
+			ori $t4, $zero, -1
+			beq $t3, $t4, tire_deja_touche	# Si on a déjà touché cette case
 			ori $t4, $zero, -2
 			sw $t4, 0($s2)				# On met -2 dans la case
 			la $a0, plouf
+			ori $v0, $zero, 4
+			syscall						# Affichage de plouf!
+			j tire_bateau_suite
+
+tire_deja_touche:
+			ori $t4, $zero, -1
+			sw $t4, 0($s2)				# On met -1 dans la case
+			la $a0, deja_touche
 			ori $v0, $zero, 4
 			syscall						# Affichage de plouf!
 			j tire_bateau_suite
