@@ -141,7 +141,7 @@ int remplitGrille(int grille[N][N]){
 	poseBateau(grille,3,2);
 	nbBateaux = poseBateau(grille,2,1);
 
-	return nbBateaux+1;
+	return nbBateaux-1;
 }
 
 int encoreBateau(int grille[N][N], int numBateau){
