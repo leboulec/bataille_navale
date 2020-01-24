@@ -1,5 +1,7 @@
 	.data
 grille:			.space 400				# Grille de 10x10 entiers
+input_buffer: 	.space 12 				# Scores fichiers (3 scores max)
+output_buffer: 	.word 					# score max à ecrire dans le fichier
 bord_grille: 	.asciiz "___________________________________________\n"
 numColonne:		.asciiz "|.| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |\n"
 separateur:		.asciiz " |"
@@ -19,6 +21,7 @@ coups:			.asciiz " coups\n"
 nombreBateaux:	.word 0
 bienvenue:		.asciiz "Bienvenue ! \nSi vous souhaitez débuter une partie, entrez 1. Si vous souhaitez continuer une partie précédemment commencée, entrez 2 ... \n"
 difficulte:		.asciiz "\nVoici la grille !\nVeuillez choisir la difficulté ... Entrez 1 pour la difficulté débutant, 2 pour la difficulté expert\n"
+erreur: 		.asciiz "\nErreur ! Impossible d'ouvrir le fichier"
 
 	.text
 
@@ -490,9 +493,36 @@ remplit_grille:
 		addu $sp, $sp, 64				# Ajustement de $sp
 
 
-tableau_score:
+										
+tableau_score: 							# Arguments : $a0 <= score
 
-			#SYSCALL 13 ou 14 ou 15 jsp encore j'ai check la doc MIPS mais jsp ce que c'est un buffer je comprends r je continuerai demain je suis fatigué
+		add $t0, $a0, $zero 			# $t0 <= score
+		la $a0, nom_fichier
+		addi $a1, $zero, 0 				# write
+		addi $a2, $zero, 0 				# mode ignoré
+		addi $v0, $zero, 13 			# open file
+		syscall 						
+
+		bltz $v0, erreur_fichier 		# Si erreur lors de l'ouverture du fichier				
+
+		add $a0, $v0, $zero 			# $a0 <= file descriptor, nécessaire pour appeler syscall 14
+		la $a1, input_buffer 			# $a1 <= adresse du tampon d'entrée
+		addi $a2, $zero, 9 				# Maximum de 9 caractères à lire (score < 1000, il y a trois scores)
+		addi $v0, $zero, 14 			# Read to file			
+		syscall
+
+		## Comparer score aux scores max puis ecrire dans fichier. Fermer fichier + jr $ra
+	
+
+
+
+
+erreur_fichier:
+		la $a0, erreur 					# Affiche le message d'erreur d'ouverture du fichier
+		ori $v0, $zero, 4
+		syscall
+
+		
 
 lecture_entier:
 			ori $t0, $zero, 47			# Code ASCII 0 - 1
