@@ -182,7 +182,7 @@ debug_affiche_grille:					# Fonction affichant tous les bateaux sur la grille
 		syscall							
 
 		ori $t1, $zero, 0				# $t1 <- ligne = 0
-										# $t6 <- addresse de l'élément à afficher
+										# $t6 <- adresse de l'élément à afficher
 
 debug_for_aff_grille_ligne:
 		ori $a0, $zero, 124				# Affichage de |k| où k est le numéro de la ligne. Code ASCII | = 124
@@ -238,8 +238,8 @@ pose_bateaux:							# Fonction posant un nombre de bateux de même taille aléat
 		sw $fp, 60($sp)					##
 		addu $fp, $sp, 64				##
 		sw $a0, 0($sp)					# Sauvegarde de l'adresse de la grille
-		sw $s0, 4($sp)					# Sauvegarde de $s0										###A RESTAURER IMPERATIVEMENT### ###PAS FORCEMENT UTILE###
-		sw $s1, 8($sp)					# Sauvegarde de $s1										###A RESTAURER IMPERATIVEMENT###
+		sw $s0, 4($sp)					# Sauvegarde de $s0 (inutile ici)
+		sw $s1, 8($sp)					# Sauvegarde de $s1
 		or $t1, $zero, $a1				# $t1 <- nombre de bateaux à poser
 
 		ori $t0, $zero, 0				# $t0 <- i=0
@@ -277,12 +277,10 @@ while_pose_bateaux:
 		sub $t6, $zero, $a2				# $t6 <- -tailleBateauxAPoser
 		addi $t6, $t6, 10				# $t6 <- tailleGrille - tailleBateauxAPoser
 		slt $t6, $t6, $t3				# $t6 <- x > tailleGrille - tailleBateauxAPoser
-		bne $t6, $zero, while_pose_bateaux	# La pose est impossible, on revient au début du while	###$t2 DISPO###
-
-		###JE ME SUIS PERDU DANS LES FOR: A REFAIRE###
+		bne $t6, $zero, while_pose_bateaux	# La pose est impossible, on revient au début du while
 
 		lw $t6, 0($sp)
-		add $t6, $t6, $s1				# $t6 <- addresse de l'élément du tableau à tester
+		add $t6, $t6, $s1				# $t6 <- adresse de l'élément du tableau à tester
 		or $t2, $zero, $t3				# $t2 <- i=x
 for_pose_bat_hor:
 		lw $t7, 0($t6)					# $t7 <- élément du tableau à tester
@@ -298,10 +296,10 @@ if_pose_bateaux_vert:
 		sub $t6, $zero, $a2				# $t6 <- -tailleBateauxAPoser
 		addi $t6, $t6, 10				# $t6 <- tailleGrille - tailleBateauxAPoser
 		slt $t6, $t6, $t4				# $t6 <- y > tailleGrille - tailleBateauxAPoser
-		bne $t6, $zero, while_pose_bateaux	# La pose est impossible, on revient au début du while	###$t2 DISPO###
+		bne $t6, $zero, while_pose_bateaux	# La pose est impossible, on revient au début du while
 
 		lw $t6, 0($sp)
-		add $t6, $t6, $s1				# $t6 <- addresse de l'élément à tester dans la grille
+		add $t6, $t6, $s1				# $t6 <- adresse de l'élément à tester dans la grille
 		or $t2, $zero, $t4				# $t2 <- i=y
 for_pose_bat_vert:
 		lw $t7, 0($t6)					# $t7 <- élément à tester dans la grille
@@ -316,7 +314,7 @@ suite_if_pose_bateaux_vert:
 		bne $t5, $zero, orientation_pose_bateaux # Si l'orientation est horizontale, on jump
 										# Sinon l'orientation est verticale
 		lw $t6, 0($sp)
-		add $t6, $t6, $s1				# $t6 <- addresse de l'élément à remplacer dans la grille
+		add $t6, $t6, $s1				# $t6 <- adresse de l'élément à remplacer dans la grille
 		ori $t2, $zero, 0				# $t2 <- i=0
 for_pose_bateaux_pose_ver:
 		la $t8, indice_bateau
@@ -332,7 +330,7 @@ for_pose_bateaux_pose_ver:
 orientation_pose_bateaux:
 
 		lw $t6, 0($sp)
-		add $t6, $t6, $s1				# $t6 <- addresse de l'élément à tester dans la grille
+		add $t6, $t6, $s1				# $t6 <- adresse de l'élément à tester dans la grille
 		ori $t2, $zero, 0				# $t2 <- i=0
 for_pose_bateaux_pose_hor:
 		la $t8, indice_bateau
@@ -447,7 +445,7 @@ while_lect_entier:
 			jr $ra
 
 tire:									# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur
-										# Arguments : $a0 <- addresse de la grille, $a1 <- addresse du nombre de bateaux restant
+										# Arguments : $a0 <- adresse de la grille, $a1 <- adresse du nombre de bateaux restant
 					
 			subu $sp, $sp, 64			## Prologue
 			sw $fp, 60($sp)				##
