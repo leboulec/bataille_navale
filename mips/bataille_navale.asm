@@ -1,7 +1,8 @@
 	.data
 grille:			.space 400				# Grille de 10x10 entiers
-input_buffer: 	.space 12 				# Scores fichiers (3 scores max)
+input_buffer: 	.space 30 				# Scores et pseudos du fichier de scores
 output_buffer: 	.word 					# score max à ecrire dans le fichier
+pseudo: 		.space 6
 bord_grille: 	.asciiz "___________________________________________\n"
 numColonne:		.asciiz "|.| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |\n"
 separateur:		.asciiz " |"
@@ -23,6 +24,8 @@ nombreBateaux:	.word 0
 bienvenue:		.asciiz "Bienvenue ! \nSi vous souhaitez débuter une partie, entrez 1. Si vous souhaitez continuer une partie précédemment commencée, entrez 2 ... \n"
 difficulte:		.asciiz "\nVoici la grille !\nVeuillez choisir la difficulté ... Entrez 1 pour la difficulté débutant, 2 pour la difficulté expert\n"
 erreur: 		.asciiz "\nErreur ! Impossible d'ouvrir le fichier"
+pas_record: 	.asciiz "\nPas de record !"
+entrer_pseudo 	.asciiz "\nVeuillez entrer votre pseudo (6 caractères maximum) ... \n"
 
 	.text
 
@@ -159,6 +162,10 @@ fin_main:
 		syscall
 
 
+###########################################################################################
+###########################################################################################
+
+
 init_grille: 							# Fonction initialisant un tableau de int de taille 10x10 à 0
 										# Argument $a0 : adresse du tableau à initialiser
 		ori $t0, $zero, 0				# $t0 <- i=0
@@ -170,6 +177,10 @@ for_init_grille:
 		bne $t1, $zero, for_init_grille
 
 		jr $ra
+
+
+###########################################################################################
+###########################################################################################
 
 
 affiche_grille:							# Fonction affichant la grille
@@ -243,6 +254,10 @@ suite_bat:
 		jr $ra
 
 
+###########################################################################################
+###########################################################################################
+
+
 debug_affiche_grille:					# Fonction affichant tous les bateaux sur la grille
 										# Argument $a0 : adresse de la grille
 		lw $t0, 0($a0)					# $t0 <- T[0]
@@ -303,6 +318,10 @@ debug_for_aff_grille_colonne:
 		syscall
 
 		jr $ra
+
+
+###########################################################################################
+###########################################################################################
 
 
 pose_bateaux:							# Fonction posant un nombre de bateux de même taille aléatoirement sur la grille
@@ -435,6 +454,8 @@ suite_if_orientation_pose_bateaux:
 		jr $ra
 
 
+###########################################################################################
+###########################################################################################
 
 
 encore_bateau:							# Fonction qui teste s'il reste le bateau d'indice donné
@@ -454,9 +475,13 @@ for_eb:
 		addi $v0, $zero,0				# return 0
 		jr $ra
 
-ret1:   	addi $v0, $zero, 1				# return 1
+ret1:   	
+		addi $v0, $zero, 1				# return 1
 		jr $ra
 
+
+###########################################################################################
+###########################################################################################
 
 
 remplit_grille:
@@ -494,7 +519,10 @@ remplit_grille:
 		addu $sp, $sp, 64				# Ajustement de $sp
 
 
-										
+###########################################################################################
+###########################################################################################										
+
+
 tableau_score: 							# Arguments : $a0 <= score
 
 		add $t0, $a0, $zero 			# $t0 <= score
@@ -512,10 +540,70 @@ tableau_score: 							# Arguments : $a0 <= score
 		addi $v0, $zero, 14 			# Read to file			
 		syscall
 
-		## Comparer score aux scores max puis ecrire dans fichier. Fermer fichier + jr $ra
+		lw $t1, 0($a1) 					# $t1 <= score max
+		lw $t4, 4($a1)					# $t4 <= pseudo score max
+		lw $t2, 10($a1) 				# $t2 <= 2ème score le plus élevé
+		lw $t5, 14($a1) 				# $t5 <= 2è pseudo
+		lw $t3, 20($a1)  				# $t3 <= 3ème score le plus élevé
+		lw $t6, 24($a1)
+
+		slt $t7, $t0, $t1 				# $t4 <= $t0 < $t1
+		beq $t7, $zero, score_max 		# score > score max, nouveau record
+
+		slt $t7, $t0, $t2 				# $t4 <= $t0 < $t1
+		beq $t7, $zero, score_2 		# score > 2è score
+
+		slt $t7, $t0, $t3 				# $t4 <= $t0 < $t3
+		beq $t7, $zero, score_3 		# score > 3è score
+
+		la $a0, pas_record				# Affiche le message disant qu'il n'y a pas de record
+		ori $v0, $zero, 4
+		syscall
+
+		jr $ra	
+
+score_max:
+		add $t3, $t2, $zero 
+		add $t2, $t1, $zero
+		add $t1, $t0, $zero 			# Les scores changent, le meilleur score est score, l'ancien score max est maintenant le deuxième meilleur score ect
+
+		la $a0, entrer_pseudo			# Affiche le message disant d'entrer son pseudo
+		ori $v0, $zero, 4
+		syscall
+
+		la $a0, pseudo  				# Demande à l'utilisateur de rentrer son pseudo
+		addi $a1, zero, 6
+		addi $v0, $zero, 8
+		syscall
+
+		la $a1, input_buffer
+
+		########CHARGER LES PSEUDOS DANS LE BUFFER 
+
 	
+		sw $t1, 0($a1) 					# On recharge les scores dans le buffer			
+		sw $t2, 10($a1) 					
+		sw $t3, 20($a1)
 
+		#######ECRIRE DANS LE FICHIER
+		#FAIRE PAREIL POUR LES DEUX AUTRES
 
+score_2:
+		add $t3, $t2, $zero
+		add $t2, $t0, $zero   			# Les scores changent, score devient le 2e score et l'ancien 2è score devient le 3è. score_max ne change pas
+
+		la $a1, input_buffer
+		sw $t1, 0($a1) 					# On recharge les scores dans le buffer			
+		sw $t2, 4($a1) 					
+		sw $t3, 8($a1)
+
+score_3:
+		add $t3, $t0, $zero 			# Score devient le 3è score. Les deux premiers scores ne changent pas
+
+		la $a1, input_buffer
+		sw $t1, 0($a1) 					# On recharge les scores dans le buffer			
+		sw $t2, 4($a1) 					
+		sw $t3, 8($a1)
 
 
 erreur_fichier:
@@ -523,7 +611,10 @@ erreur_fichier:
 		ori $v0, $zero, 4
 		syscall
 
-		
+
+###########################################################################################
+###########################################################################################
+
 
 lecture_entier:
 			ori $t0, $zero, 47			# Code ASCII 0 - 1
@@ -544,6 +635,11 @@ while_lect_entier:
 			subi $v0, $v0, 48			# Conversion caractère -> entier
 
 			jr $ra
+
+
+###########################################################################################
+###########################################################################################
+
 
 tire:									# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur
 										# Arguments : $a0 <- adresse de la grille, $a1 <- adresse du nombre de bateaux restant
@@ -638,6 +734,9 @@ tire_bateau_suite:
 
 			jr $ra
 
+
+###########################################################################################
+###########################################################################################
 
 
 tire_debutant:							# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur en mode débutant
@@ -758,3 +857,6 @@ tire_debutant_bateau_suite:
 			addu $sp, $sp, 64				# Ajustement de $sp
 
 			jr $ra
+
+###########################################################################################
+###########################################################################################
