@@ -26,8 +26,11 @@ difficulte:		.asciiz "\nVoici la grille !\nVeuillez choisir la difficulté ... E
 erreur: 		.asciiz "\nErreur ! Impossible d'ouvrir le fichier"
 fichier_sauv:	.asciiz "./partie.save"
 erreur_sauv:	.asciiz "Erreur lors de la sauvegarde de la partie\n"
+erreur_lect:	.asciiz "Erreur lors de l'ouverture du fichier\n"
 pas_record: 	.asciiz "\nPas de record !"
 entrer_pseudo: 	.asciiz "\nVeuillez entrer votre pseudo (6 caractères maximum) ... \n"
+.align 2
+buffer_sauv:	.space 412
 
 	.text
 
@@ -44,7 +47,7 @@ main:
 
 		addi $t1, $zero, 2 				# $t1 <= 2
 
-		#beq $v0, $t1, 					# Si l'utilisateur a rentré 2
+		beq $v0, $t1, reprise_partie	# Si l'utilisateur a rentré 2
 
 		la $a0, erreur_lecture			# L'utilisateur a entré une mauvaise valeur
 		ori $v0, $zero, 4
@@ -75,6 +78,42 @@ suite_main:
 		syscall
 
 		jal lecture_entier
+		j pas_reprise_partie
+
+reprise_partie:
+		la $a0, fichier_sauv
+		ori $a1, $zero, 0
+		or $a2, $zero, $zero
+		ori $v0, $zero, 13
+		syscall							# Ouverture du fichier
+		bltz $v0, erreur_reprise_partie
+		sw $v0, 0($sp)
+		
+		or $a0, $zero, $v0
+		la $a1, buffer_sauv
+		ori $a2, $zero, 412
+		ori $v0, $zero, 14				# Lecture fichier
+		syscall
+		bltz $v0, erreur_reprise_partie
+		
+		lw $s7, 0($a1)					# $s7 <- Difficulté	
+		lw $s1, 4($a1)					# $s1 <- nombre de coups
+		lw $s6, 8($a1)					# $s6 <- nombre de bateaux
+		la $s0, nombreBateaux
+		sw $s6, 0($s0)					# Récupère le nombre de bateaux
+
+		addi $a0, $a1, 12
+		la $a1, grille
+		ori $a2, $zero, 100
+		jal copie_tab					# On recopie la grille sauvegardée
+
+		lw $a0, 0($sp)
+		ori $v0, $zero, 16
+		syscall							# Fermeture fichier
+
+		or $v0, $zero, $s7
+
+pas_reprise_partie:
 
 		addi $t1, $zero, 1 						# $t1 <= 1 
 		beq $v0, $t1, while_main_debutant		# Si l'utilisateur a rentré 1
@@ -167,10 +206,17 @@ fin_main:
 		ori $v0, $zero, 10 				# Exit
 		syscall
 
+erreur_reprise_partie:
+		la $a0, erreur_lect
+		ori $v0, $zero, 4
+		syscall
+
 main_quitter:
 		la $a0, grille
 		or $a1, $zero, $t0
 		or $a2, $zero, $s1
+		la $t0, nombreBateaux
+		lw $a3, 0($t0)
 		jal sauvegarde
 
 		ori $v0, $zero, 10 				# Exit
@@ -894,14 +940,15 @@ tire_debutant_bateau_suite:
 ###########################################################################################
 
 sauvegarde:								# Fonction sauvegardant la partie
-										# Argument: $a0 <- adresse de la grille, $a1 <- difficulté, $a2 <- nombre de coups
+										# Argument: $a0 <- adresse de la grille, $a1 <- difficulté, $a2 <- nombre de coups, $a3 <- nombre de bateaux
 			subu $sp, $sp, 512			## Prologue
 			sw $fp, 508($sp)			##
 			addu $fp, $sp, 512			##
 			sw $ra, 0($sp)				# Sauvegarde de $ra
 			sw $a0, 4($sp)
 			sw $a1, 8($sp)
-			sw $a2, 12($sp)				# Sauvegarde des arguments
+			sw $a2, 12($sp)
+			sw $a3, 16($sp)				# Sauvegarde des arguments
 
 			la $a0, fichier_sauv
 			ori $a1, $zero, 1
@@ -912,15 +959,16 @@ sauvegarde:								# Fonction sauvegardant la partie
 			sw $v0, 504($sp)
 
 			lw $a0, 4($sp)
-			addi $a1, $sp, 16
+			addi $a1, $sp, 20
 			ori $a2, $zero, 100
 			jal copie_tab			# Copie de la grille dans la pile de la fonction
 
+
 			lw $a0, 504($sp)
 			addi $a1, $sp, 8
-			ori $a2, $zero, 408
+			ori $a2, $zero, 412
 			ori $v0, $zero, 15
-			syscall						# Ecriture dans le fichier de 408 octet (difficulté + nombre de coups + grille à l'adresse $sp + 8)
+			syscall						# Ecriture dans le fichier de 412 octet (difficulté + nombre de coups + grille à l'adresse $sp + 8)
 			bltz $v0, sauvegarde_erreur
 
 			ori $v0, $zero, 16
