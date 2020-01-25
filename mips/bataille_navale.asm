@@ -397,7 +397,7 @@ debug_for_aff_grille_colonne:
 ###########################################################################################
 
 
-pose_bateaux:							# Fonction posant un nombre de bateux de même taille aléatoirement sur la grille
+pose_bateaux:							# Fonction posant un nombre de bateaux de même taille aléatoirement sur la grille
 										# Arguments : $a0 <- adresse de la grille, $a1 <- nombre de bateaux à poser, $a2 <- taille des bateaux à poser
 										# Retourne dans $v0 le numéro du dernier bateau posé + 1 : numéro du prochain bateau à poser
 		subu $sp, $sp, 64				## Prologue
@@ -721,7 +721,7 @@ lecture_entier_quitter:
 
 
 tire:									# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur
-										# Arguments : $a0 <- adresse de la grille, $a1 <- adresse du nombre de bateaux restant
+										# Arguments : $a0 <- adresse de la grille, $a1 <- adresse du nombre de bateaux restants
 					
 			subu $sp, $sp, 64			## Prologue
 			sw $fp, 60($sp)				##
@@ -952,7 +952,7 @@ tire_debutant_bateau_suite:
 ###########################################################################################
 
 sauvegarde:								# Fonction sauvegardant la partie
-										# Argument: $a0 <- adresse de la grille, $a1 <- difficulté, $a2 <- nombre de coups, $a3 <- nombre de bateaux
+										# Arguments: $a0 <- adresse de la grille, $a1 <- difficulté, $a2 <- nombre de coups, $a3 <- nombre de bateaux
 			subu $sp, $sp, 512			## Prologue
 			sw $fp, 508($sp)			##
 			addu $fp, $sp, 512			##
