@@ -87,6 +87,11 @@ suite_main:
 while_main_expert: 
 
 		la $a0, grille
+		ori $a1, $zero, 2
+		or $a2, $zero, $s1
+		jal sauvegarde
+
+		la $a0, grille
 		or $a1, $zero, $s0
 		jal tire                     	# Appel de tire
 
@@ -782,8 +787,7 @@ sauvegarde:								# Fonction sauvegardant la partie
 
 			lw $a0, 4($sp)
 			addi $a1, $sp, 16
-			ori $a2, $zero, 100
-			jal copie_tab			# Copie de la grille dans la pile de la fonction
+			jal copie_grille			# Copie de la grille dans la pile de la fonction
 
 			lw $a0, 16($sp)
 			addi $a1, $sp, 8
@@ -791,9 +795,6 @@ sauvegarde:								# Fonction sauvegardant la partie
 			ori $v0, $zero, 15
 			syscall						# Ecriture dans le fichier de 408 octet (difficulté + nombre de coups + grille à l'adresse $sp + 8)
 			bltz $v0, sauvegarde_erreur
-
-			ori $v0, $zero, 16
-			syscall						# Fermeture du fichier
 
 			j sauvegarde_fin
 
@@ -803,22 +804,25 @@ sauvegarde_erreur:
 			syscall						# Affichage de erreur sauvegarde
 
 sauvegarde_fin:
+			ori $v0, $zero, 16
+			syscall						# Fermeture du fichier
+
 			lw $ra, 0($sp)
 			lw $fp, 508($sp)			# Restauration de $fp
 			addu $sp, $sp, 512			# Ajustement de $sp
 			jr $ra
 
 
-copie_tab:								# Fonction copiant un tableau
-										# $a0 <- adresse de la grille à copier, $a1 <- adresse où copier la grille, $a2 <- taille du tableau en mots(=4 octets)
+copie_grille:							# Fonction copiant la grille
+										# $a0 <- adresse de la grille à copier, $a1 <- adresse où copier la grille
 			or $t0, $zero, $zero		# $t0 <- i=0
-copie_tab_for:
+copie_grille_for:
 			lw $t1, 0($a0)
 			sw $t1, 0($a1)
 			addi $t0, $t0, 1
 			addi $a0, $a0, 4
 			addi $a1, $a1, 4			# i++
-			slt $t2, $t0, $a2
-			bne $t2, $zero, copie_tab_for # i < 100
+			slti $t2, $t0, 100
+			bne $t2, $zero, copie_grille_for # i < 100
 
 			jr $ra
