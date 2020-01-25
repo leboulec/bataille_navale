@@ -15,7 +15,7 @@ plouf:			.asciiz "\nPlouf!\n"
 touche:			.asciiz "\nTouche!\n"
 coule:			.asciiz "\nCoule!\n"
 deja_touche:	.asciiz "\nDeja touche\n"
-proxi:			.asciiz "Pas loin!\n"
+proxi:			.asciiz "Pas loin !\n"
 reste:			.asciiz "Il reste "
 bateaux:		.asciiz " bateaux\n"
 bravo:			.asciiz "Bravo ! Vous avez gagné en "
@@ -31,6 +31,7 @@ pas_record: 	.asciiz "\nPas de record !"
 entrer_pseudo: 	.asciiz "\nVeuillez entrer votre pseudo (6 caractères maximum) ... \n"
 .align 2
 buffer_sauv:	.space 412
+commence: 		.asciiz "La partie commence ! Entrez q à tout moment pour quitter la partie."
 
 	.text
 
@@ -81,6 +82,9 @@ suite_main:
 		j pas_reprise_partie
 
 reprise_partie:
+		la $a0, grille
+		jal affiche_grille
+
 		la $a0, fichier_sauv
 		ori $a1, $zero, 0
 		or $a2, $zero, $zero
@@ -128,6 +132,10 @@ pas_reprise_partie:
 
 while_main_expert: 
 
+		la $a0, commence 				# Affiche le message de commencement
+		ori $v0, $zero, 4
+		syscall
+
 		la $a0, grille
 		or $a1, $zero, $s0
 		jal tire                     	# Appel de tire
@@ -157,6 +165,10 @@ while_main_expert:
 
 
 while_main_debutant: 
+
+		la $a0, commence 				# Affiche le message de commencement
+		ori $v0, $zero, 4
+		syscall
 
 		la $a0, grille
 		or $a1, $zero, $s0
@@ -638,11 +650,11 @@ score_max:
 		syscall
 
 		la $a1, input_buffer
-
+		addi $a2, $zero, 2 				# 6 octets soit 2 mots à charger
 		########CHARGER LES PSEUDOS DANS LE BUFFER 
 
 	
-		sw $t1, 0($a1) 					# On recharge les scores dans le buffer			
+		sw $t1, 0($a1) 					# On charge les nouveaux scores dans le buffer			
 		sw $t2, 10($a1) 					
 		sw $t3, 20($a1)
 
