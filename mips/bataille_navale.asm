@@ -1,13 +1,15 @@
 	.data
 grille:			.space 400				# Grille de 10x10 entiers
+input_buffer: 	.space 12 				# Scores fichiers (3 scores max)
+output_buffer: 	.word 					# score max à ecrire dans le fichier
 bord_grille: 	.asciiz "___________________________________________\n"
 numColonne:		.asciiz "|.| 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |\n"
 separateur:		.asciiz " |"
 nom_fichier:    .asciiz "score.txt"
 erreur_lecture: .asciiz "\nErreur : veuillez entrer une valeur correcte\n"
 indice_bateau:	.word 1					# Variable statique utilisé par pose_bateaux
-question_ligne:	.asciiz "Entrer le numero de la ligne : "
-question_col:	.asciiz "\nEntrer le numero de la colonne : "
+question_ligne:	.asciiz "\nEntrez le numero de la ligne : "
+question_col:	.asciiz "\nEntrez le numero de la colonne : "
 plouf:			.asciiz "\nPlouf!\n"
 touche:			.asciiz "\nTouche!\n"
 coule:			.asciiz "\nCoule!\n"
@@ -18,10 +20,34 @@ bateaux:		.asciiz " bateaux\n"
 bravo:			.asciiz "Bravo ! Vous avez gagné en "
 coups:			.asciiz " coups\n"
 nombreBateaux:	.word 0
+bienvenue:		.asciiz "Bienvenue ! \nSi vous souhaitez débuter une partie, entrez 1. Si vous souhaitez continuer une partie précédemment commencée, entrez 2 ... \n"
+difficulte:		.asciiz "\nVoici la grille !\nVeuillez choisir la difficulté ... Entrez 1 pour la difficulté débutant, 2 pour la difficulté expert\n"
+erreur: 		.asciiz "\nErreur ! Impossible d'ouvrir le fichier"
 
 	.text
 
-main:
+main:	
+		la $a0, bienvenue 				# Affiche le message de début de partie
+		ori $v0, $zero, 4
+		syscall
+
+		jal lecture_entier
+
+		addi $t1, $zero, 1				# $t1 <= 1
+
+		beq $v0, $t1, suite_main  		# Si l'utilisateur a rentré 1
+
+		addi $t1, $zero, 2 				# $t1 <= 2
+
+		#beq $v0, $t1, 					# Si l'utilisateur a rentré 2
+
+		la $a0, erreur_lecture			# L'utilisateur a entré une mauvaise valeur
+		ori $v0, $zero, 4
+		syscall
+		j main
+
+suite_main:
+
 		subu $sp, $sp, 64				## Allocation d'un espace de 64o pour le main
 		addu $fp, $sp, 64				## Mise à jour de $fp
 
@@ -39,7 +65,24 @@ main:
 		la $s0, nombreBateaux
 		sw $t0, 0($s0)					# Sauvegarde du nombre de bateaux
 
-while_main: 
+		la $a0, difficulte				# Affiche le message pour choisir la difficulté
+		ori $v0, $zero, 4
+		syscall
+
+		jal lecture_entier
+
+		addi $t1, $zero, 1 						# $t1 <= 1 
+		beq $v0, $t1, while_main_debutant		# Si l'utilisateur a rentré 1
+
+		addi $t1, $zero, 2 						# $t1 <= 2
+		beq $v0, $t1, while_main_expert 		# Si l'utilisateur a rentré 2
+
+		la $a0, erreur_lecture					# L'utilisateur a entré une mauvaise valeur
+		ori $v0, $zero, 4
+		syscall
+		j suite_main
+
+while_main_expert: 
 
 		la $a0, grille
 		or $a1, $zero, $s0
@@ -63,9 +106,39 @@ while_main:
 		addi $s1, $s1, 1 				# nb_coups ++
 		
 		lw $t0, 0($s0)
-		bne $t0, $zero, while_main		# Si nbBateau != 0 goto while_main
+		bne $t0, $zero, while_main_expert	# Si nbBateau != 0 goto while_main
+		j fin_main
 
 
+while_main_debutant: 
+
+		la $a0, grille
+		or $a1, $zero, $s0
+		#jal tire_debutant               # Appel de tire_debutant
+
+		la $a0, reste 					# Affiche "il reste"
+		ori $v0, $zero, 4
+		syscall
+		
+		lw $a0, 0($s0)
+		ori $v0, $zero, 1
+		syscall  						# Affiche nbBateaux
+
+		la $a0, bateaux 				# Affiche "bateaux"
+		ori $v0, $zero, 4
+		syscall
+
+		la $a0, grille 					# Appel de affiche_grille
+		jal affiche_grille
+
+		addi $s1, $s1, 1 				# nb_coups ++
+		
+		lw $t0, 0($s0)
+		bne $t0, $zero, while_main_debutant	# Si nbBateau != 0 goto while_main_debutant
+
+
+
+fin_main:
 
 		la $a0, bravo 					# Affiche "Bravo ! Vous avez gagné en"
 		ori $v0, $zero, 4
@@ -421,9 +494,36 @@ remplit_grille:
 		addu $sp, $sp, 64				# Ajustement de $sp
 
 
-tableau_score:
+										
+tableau_score: 							# Arguments : $a0 <= score
 
-			#SYSCALL 13 ou 14 ou 15 jsp encore j'ai check la doc MIPS mais jsp ce que c'est un buffer je comprends r je continuerai demain je suis fatigué
+		add $t0, $a0, $zero 			# $t0 <= score
+		la $a0, nom_fichier
+		addi $a1, $zero, 0 				# write
+		addi $a2, $zero, 0 				# mode ignoré
+		addi $v0, $zero, 13 			# open file
+		syscall 						
+
+		bltz $v0, erreur_fichier 		# Si erreur lors de l'ouverture du fichier				
+
+		add $a0, $v0, $zero 			# $a0 <= file descriptor, nécessaire pour appeler syscall 14
+		la $a1, input_buffer 			# $a1 <= adresse du tampon d'entrée
+		addi $a2, $zero, 9 				# Maximum de 9 caractères à lire (score < 1000, il y a trois scores)
+		addi $v0, $zero, 14 			# Read to file			
+		syscall
+
+		## Comparer score aux scores max puis ecrire dans fichier. Fermer fichier + jr $ra
+	
+
+
+
+
+erreur_fichier:
+		la $a0, erreur 					# Affiche le message d'erreur d'ouverture du fichier
+		ori $v0, $zero, 4
+		syscall
+
+		
 
 lecture_entier:
 			ori $t0, $zero, 47			# Code ASCII 0 - 1
