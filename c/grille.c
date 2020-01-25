@@ -216,7 +216,7 @@ void tableau_score(char* filename, int score){
 	if( (fichier = fopen(filename, "w+")) != NULL){
 		fscanf(fichier, "%d", &scoreFichier);
 
-		if(MAX(score, scoreFichier) == scoreFichier){
+		if(MAX(score, scoreFichier) == score){
 
 			printf("Nouveau record !\n");
 			printf("Veuillez entrer votre pseudo : ");
