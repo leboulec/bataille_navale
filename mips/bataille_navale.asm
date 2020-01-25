@@ -25,13 +25,13 @@ bienvenue:		.asciiz "Bienvenue ! \nSi vous souhaitez débuter une partie, entrez
 difficulte:		.asciiz "\nVoici la grille !\nVeuillez choisir la difficulté ... Entrez 1 pour la difficulté débutant, 2 pour la difficulté expert\n"
 erreur: 		.asciiz "\nErreur ! Impossible d'ouvrir le fichier"
 fichier_sauv:	.asciiz "./partie.save"
-erreur_sauv:	.asciiz "Erreur lors de la sauvegarde de la partie\n"
-erreur_lect:	.asciiz "Erreur lors de l'ouverture du fichier\n"
+erreur_sauv:	.asciiz "\nErreur lors de la sauvegarde de la partie\n"
+erreur_lect:	.asciiz "\nErreur lors de l'ouverture du fichier\n"
 pas_record: 	.asciiz "\nPas de record !"
 entrer_pseudo: 	.asciiz "\nVeuillez entrer votre pseudo (6 caractères maximum) ... \n"
 .align 2
 buffer_sauv:	.space 412
-commence: 		.asciiz "La partie commence ! Entrez q à tout moment pour quitter la partie."
+commence: 		.asciiz "\nLa partie commence ! Entrez q à tout moment pour quitter la partie."
 
 	.text
 
@@ -82,8 +82,6 @@ suite_main:
 		j pas_reprise_partie
 
 reprise_partie:
-		la $a0, grille
-		jal affiche_grille
 
 		la $a0, fichier_sauv
 		ori $a1, $zero, 0
@@ -111,6 +109,9 @@ reprise_partie:
 		ori $a2, $zero, 100
 		jal copie_tab					# On recopie la grille sauvegardée
 
+		la $a0, grille
+		jal affiche_grille
+
 		lw $a0, 0($sp)
 		ori $v0, $zero, 16
 		syscall							# Fermeture fichier
@@ -119,11 +120,17 @@ reprise_partie:
 
 pas_reprise_partie:
 
+		add $t8, $v0, $zero
+
+		la $a0, commence 						# Affiche le message de commencement
+		ori $v0, $zero, 4
+		syscall
+
 		addi $t1, $zero, 1 						# $t1 <= 1 
-		beq $v0, $t1, while_main_debutant		# Si l'utilisateur a rentré 1
+		beq $t8, $t1, while_main_debutant		# Si l'utilisateur a rentré 1
 
 		addi $t1, $zero, 2 						# $t1 <= 2
-		beq $v0, $t1, while_main_expert 		# Si l'utilisateur a rentré 2
+		beq $t8, $t1, while_main_expert 		# Si l'utilisateur a rentré 2
 
 		la $a0, erreur_lecture					# L'utilisateur a entré une mauvaise valeur
 		ori $v0, $zero, 4
@@ -131,10 +138,6 @@ pas_reprise_partie:
 		j suite_main
 
 while_main_expert: 
-
-		la $a0, commence 				# Affiche le message de commencement
-		ori $v0, $zero, 4
-		syscall
 
 		la $a0, grille
 		or $a1, $zero, $s0
@@ -154,7 +157,7 @@ while_main_expert:
 		ori $v0, $zero, 4
 		syscall
 
-		la $a0, grille 					# Appel de affiche_grille
+		la $a0, grille 					# Appel 	de affiche_grille
 		jal affiche_grille
 
 		addi $s1, $s1, 1 				# nb_coups ++
@@ -165,10 +168,6 @@ while_main_expert:
 
 
 while_main_debutant: 
-
-		la $a0, commence 				# Affiche le message de commencement
-		ori $v0, $zero, 4
-		syscall
 
 		la $a0, grille
 		or $a1, $zero, $s0
