@@ -14,7 +14,7 @@ plouf:			.asciiz "\nPlouf!\n"
 touche:			.asciiz "\nTouche!\n"
 coule:			.asciiz "\nCoule!\n"
 deja_touche:	.asciiz "\nDeja touche\n"
-proxi:			.asciiz "\nPas loin!\n"
+proxi:			.asciiz "Pas loin!\n"
 reste:			.asciiz "Il reste "
 bateaux:		.asciiz " bateaux\n"
 bravo:			.asciiz "Bravo ! Vous avez gagné en "
@@ -114,7 +114,7 @@ while_main_debutant:
 
 		la $a0, grille
 		or $a1, $zero, $s0
-		#jal tire_debutant               # Appel de tire_debutant
+		jal tire_debutant               # Appel de tire_debutant
 
 		la $a0, reste 					# Affiche "il reste"
 		ori $v0, $zero, 4
@@ -691,21 +691,21 @@ tire_debutant:							# Fonction tirant une torpille dans la case de coordonnées
 			syscall						# Affichage de plouf!
 			
 										# On regarde les cases autour s'il y a un bateau $s2 <- adresse de la case (check avec s0 <- ligne et s1 <- colonne)
-			beq $s0, $zero, tire_debutant_pas_case_gauche	# Pas de case à gauche
+			beq $s1, $zero, tire_debutant_pas_case_gauche	# Pas de case à gauche
 			lw $t1, -4($s2)
 			bgtz $t1, tire_debutant_bateau_proxi # Bateau à proximité
 tire_debutant_pas_case_gauche:
 			ori $t0, $zero, 9
-			beq $s0, $t0, tire_debutant_pas_case_droite # Pas de case à droite
+			beq $s1, $t0, tire_debutant_pas_case_droite # Pas de case à droite
 			lw $t1, 4($s2)
 			bgtz $t1, tire_debutant_bateau_proxi # Bateau à proximité
 tire_debutant_pas_case_droite:
-			beq $s1, $zero, tire_debutant_pas_case_haut # Pas de case en haut
+			beq $s0, $zero, tire_debutant_pas_case_haut # Pas de case en haut
 			lw $t1, -40($s2)
 			bgtz $t1, tire_debutant_bateau_proxi # Bateau à proximité
 tire_debutant_pas_case_haut:
 			ori $t0, $zero, 9
-			beq $s1, $t0, tire_debutant_bateau_suite # Pas de case en bas
+			beq $s0, $t0, tire_debutant_bateau_suite # Pas de case en bas
 			lw $t1, 40($s2)
 			bgtz $t1, tire_debutant_bateau_proxi # Bateau à proximité
 			j tire_debutant_bateau_suite
