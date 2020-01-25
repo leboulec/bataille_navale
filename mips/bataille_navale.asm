@@ -24,10 +24,10 @@ nombreBateaux:	.word 0
 bienvenue:		.asciiz "Bienvenue ! \nSi vous souhaitez débuter une partie, entrez 1. Si vous souhaitez continuer une partie précédemment commencée, entrez 2 ... \n"
 difficulte:		.asciiz "\nVoici la grille !\nVeuillez choisir la difficulté ... Entrez 1 pour la difficulté débutant, 2 pour la difficulté expert\n"
 erreur: 		.asciiz "\nErreur ! Impossible d'ouvrir le fichier"
-fichier_sauv:	.asciiz "partie.save"
+fichier_sauv:	.asciiz "./partie.save"
 erreur_sauv:	.asciiz "Erreur lors de la sauvegarde de la partie\n"
 pas_record: 	.asciiz "\nPas de record !"
-entrer_pseudo 	.asciiz "\nVeuillez entrer votre pseudo (6 caractères maximum) ... \n"
+entrer_pseudo: 	.asciiz "\nVeuillez entrer votre pseudo (6 caractères maximum) ... \n"
 
 	.text
 
@@ -92,6 +92,8 @@ while_main_expert:
 		la $a0, grille
 		or $a1, $zero, $s0
 		jal tire                     	# Appel de tire
+		ori $t0, $zero, 2				# Difficulté
+		bltz $v0, main_quitter
 
 		la $a0, reste 					# Affiche "il reste"
 		ori $v0, $zero, 4
@@ -120,6 +122,8 @@ while_main_debutant:
 		la $a0, grille
 		or $a1, $zero, $s0
 		jal tire_debutant               # Appel de tire_debutant
+		ori $t0, $zero, 1				# Difficulté
+		bltz $v0, main_quitter
 
 		la $a0, reste 					# Affiche "il reste"
 		ori $v0, $zero, 4
@@ -159,6 +163,15 @@ fin_main:
 
 		la $a0, grille 					# Affiche la grille cachée
 		jal debug_affiche_grille
+
+		ori $v0, $zero, 10 				# Exit
+		syscall
+
+main_quitter:
+		la $a0, grille
+		or $a1, $zero, $t0
+		or $a2, $zero, $s1
+		jal sauvegarde
 
 		ori $v0, $zero, 10 				# Exit
 		syscall
@@ -574,7 +587,7 @@ score_max:
 		syscall
 
 		la $a0, pseudo  				# Demande à l'utilisateur de rentrer son pseudo
-		addi $a1, zero, 6
+		addi $a1, $zero, 6
 		addi $v0, $zero, 8
 		syscall
 
@@ -621,6 +634,7 @@ erreur_fichier:
 lecture_entier:
 			ori $t0, $zero, 47			# Code ASCII 0 - 1
 			ori $t1, $zero, 58			# Code ASCII 9 + 1
+			ori $t4, $zero, 113			# Code ASCII q
 			j while_lect_entier
 lecture_entier_erreur:
 			la $a0, erreur_lecture
@@ -629,6 +643,7 @@ lecture_entier_erreur:
 while_lect_entier:
 			ori $v0, $zero, 12
 			syscall
+			beq $v0, $t4, lecture_entier_quitter
 			slt $t2, $t0, $v0
 			slt $t3, $v0, $t1
 			and $t2, $t2, $t3			# Est-ce que le caractère rentré correspond à un nombre?
@@ -636,6 +651,10 @@ while_lect_entier:
 
 			subi $v0, $v0, 48			# Conversion caractère -> entier
 
+			jr $ra
+
+lecture_entier_quitter:
+			ori $v0, $zero, -1
 			jr $ra
 
 
@@ -660,6 +679,7 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 			syscall						# Affichage de "Ligne : "
 
 			jal lecture_entier
+			bltz $v0, tire_quitter
 			or $s0, $zero, $v0			# $s0 <- ligne
 
 			la $a0, question_col
@@ -667,6 +687,7 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 			syscall						# Affichage de "Colonne : "
 
 			jal lecture_entier
+			bltz $v0, tire_quitter
 			or $s1, $zero, $v0			# $s1 <- colonne
 
 			lw $a0, 4($sp)
@@ -726,7 +747,10 @@ tire_coule:
 tire_coule_suite:
 			ori $v0, $zero, 4
 			syscall						# Affichage touche/coule
+			j tire_bateau_suite
 
+tire_quitter:
+			ori $v0, $zero, -1
 tire_bateau_suite:
 			lw $ra, 12($sp)
 			lw $fp, 60($sp)					# Restauration de $fp
@@ -758,6 +782,7 @@ tire_debutant:							# Fonction tirant une torpille dans la case de coordonnées
 			syscall						# Affichage de "Ligne : "
 
 			jal lecture_entier
+			bltz $v0, tire_debutant_quitter
 			or $s0, $zero, $v0			# $s0 <- ligne
 
 			la $a0, question_col
@@ -765,6 +790,7 @@ tire_debutant:							# Fonction tirant une torpille dans la case de coordonnées
 			syscall						# Affichage de "Colonne : "
 
 			jal lecture_entier
+			bltz $v0, tire_debutant_quitter
 			or $s1, $zero, $v0			# $s1 <- colonne
 
 			lw $a0, 4($sp)
@@ -850,6 +876,10 @@ tire_debutant_coule:
 tire_debutant_coule_suite:
 			ori $v0, $zero, 4
 			syscall						# Affichage touche/coule
+			j tire_bateau_suite
+
+tire_debutant_quitter:
+			ori $v0, $zero, -1
 
 tire_debutant_bateau_suite:
 			lw $ra, 12($sp)
@@ -859,6 +889,9 @@ tire_debutant_bateau_suite:
 			addu $sp, $sp, 64				# Ajustement de $sp
 
 			jr $ra
+
+###########################################################################################
+###########################################################################################
 
 sauvegarde:								# Fonction sauvegardant la partie
 										# Argument: $a0 <- adresse de la grille, $a1 <- difficulté, $a2 <- nombre de coups
@@ -876,14 +909,14 @@ sauvegarde:								# Fonction sauvegardant la partie
 			ori $v0, $zero, 13
 			syscall						# Ouverture du fichier de sauvegarde
 			bltz $v0, sauvegarde_erreur
-			sw $v0, 16($sp)
+			sw $v0, 504($sp)
 
 			lw $a0, 4($sp)
 			addi $a1, $sp, 16
 			ori $a2, $zero, 100
 			jal copie_tab			# Copie de la grille dans la pile de la fonction
 
-			lw $a0, 16($sp)
+			lw $a0, 504($sp)
 			addi $a1, $sp, 8
 			ori $a2, $zero, 408
 			ori $v0, $zero, 15
@@ -906,6 +939,8 @@ sauvegarde_fin:
 			addu $sp, $sp, 512			# Ajustement de $sp
 			jr $ra
 
+###########################################################################################
+###########################################################################################
 
 copie_tab:								# Fonction copiant un tableau
 										# $a0 <- adresse de la grille à copier, $a1 <- adresse où copier la grille, $a2 <- taille du tableau en mots(=4 octets)
