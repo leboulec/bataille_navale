@@ -21,8 +21,8 @@ bateaux:		.asciiz " bateaux\n"
 bravo:			.asciiz "Bravo ! Vous avez gagné en "
 coups:			.asciiz " coups\n"
 nombreBateaux:	.word 0
-bienvenue:		.asciiz "Bienvenue ! \nSi vous souhaitez débuter une partie, entrez 1. Si vous souhaitez continuer une partie précédemment commencée, entrez 2 ... \n"
-difficulte:		.asciiz "\nVoici la grille !\nVeuillez choisir la difficulté ... Entrez 1 pour la difficulté débutant, 2 pour la difficulté expert\n"
+bienvenue:		.asciiz "Bienvenue ! \nSi vous souhaitez débuter une partie, entrez 1.\nSi vous souhaitez continuer une partie précédemment commencée, entrez 2 ... \n"
+difficulte:		.asciiz "\nVoici la grille !\nVeuillez choisir la difficulté ...\nEntrez 1 pour la difficulté débutant\nEntrez 2 pour la difficulté expert\n"
 erreur: 		.asciiz "\nErreur ! Impossible d'ouvrir le fichier"
 fichier_sauv:	.asciiz "./partie.save"
 erreur_sauv:	.asciiz "\nErreur lors de la sauvegarde de la partie\n"
@@ -40,7 +40,7 @@ main:
 		ori $v0, $zero, 4
 		syscall
 
-		jal lecture_entier
+		jal fct_lecture_entier
 
 		addi $t1, $zero, 1				# $t1 <= 1
 
@@ -61,13 +61,13 @@ suite_main:
 		addu $fp, $sp, 64				## Mise à jour de $fp
 
 		la $a0, grille					# Appel de init grille
-		jal init_grille
+		jal fct_init_grille
 		
 		la $a0, grille					# Appel de affiche_grille
-		jal affiche_grille
+		jal fct_affiche_grille
 
 		la $a0, grille 					# Appel de remplit_grille
-		jal remplit_grille 	
+		jal fct_remplit_grille 	
 
 		or $s1, $zero, $zero 			# s1 <= nombre de coups
 		or $t0, $zero, $v0				# t0 <= nbBateaux
@@ -78,7 +78,7 @@ suite_main:
 		ori $v0, $zero, 4
 		syscall
 
-		jal lecture_entier
+		jal fct_lecture_entier
 		j pas_reprise_partie
 
 reprise_partie:
@@ -107,10 +107,10 @@ reprise_partie:
 		addi $a0, $a1, 12
 		la $a1, grille
 		ori $a2, $zero, 100
-		jal copie_tab					# On recopie la grille sauvegardée
+		jal fct_copie_tab					# On recopie la grille sauvegardée
 
 		la $a0, grille
-		jal affiche_grille
+		jal fct_affiche_grille
 
 		lw $a0, 0($sp)
 		ori $v0, $zero, 16
@@ -141,7 +141,7 @@ while_main_expert:
 
 		la $a0, grille
 		or $a1, $zero, $s0
-		jal tire                     	# Appel de tire
+		jal fct_tire                     	# Appel de tire
 		ori $t0, $zero, 2				# Difficulté
 		bltz $v0, main_quitter
 
@@ -158,7 +158,7 @@ while_main_expert:
 		syscall
 
 		la $a0, grille 					# Appel 	de affiche_grille
-		jal affiche_grille
+		jal fct_affiche_grille
 
 		addi $s1, $s1, 1 				# nb_coups ++
 		
@@ -171,7 +171,7 @@ while_main_debutant:
 
 		la $a0, grille
 		or $a1, $zero, $s0
-		jal tire_debutant               # Appel de tire_debutant
+		jal fct_tire_debutant               # Appel de tire_debutant
 		ori $t0, $zero, 1				# Difficulté
 		bltz $v0, main_quitter
 
@@ -188,7 +188,7 @@ while_main_debutant:
 		syscall
 
 		la $a0, grille 					# Appel de affiche_grille
-		jal affiche_grille
+		jal fct_affiche_grille
 
 		addi $s1, $s1, 1 				# nb_coups ++
 		
@@ -212,7 +212,7 @@ fin_main:
 		syscall
 
 		la $a0, grille 					# Affiche la grille cachée
-		jal debug_affiche_grille
+		jal fct_debug_affiche_grille
 
 		ori $v0, $zero, 10 				# Exit
 		syscall
@@ -228,7 +228,7 @@ main_quitter:
 		or $a2, $zero, $s1
 		la $t0, nombreBateaux
 		lw $a3, 0($t0)
-		jal sauvegarde
+		jal fct_sauvegarde
 
 		ori $v0, $zero, 10 				# Exit
 		syscall
@@ -238,7 +238,7 @@ main_quitter:
 ###########################################################################################
 
 
-init_grille: 							# Fonction initialisant un tableau de int de taille 10x10 à 0
+fct_init_grille: 							# Fonction initialisant un tableau de int de taille 10x10 à 0
 										# Argument $a0 : adresse du tableau à initialiser
 		ori $t0, $zero, 0				# $t0 <- i=0
 for_init_grille:
@@ -255,7 +255,7 @@ for_init_grille:
 ###########################################################################################
 
 
-affiche_grille:							# Fonction affichant la grille
+fct_affiche_grille:							# Fonction affichant la grille
 										# Argument $a0 : adresse de la grille
 		lw $t0, 0($a0)					# $t0 <- T[0]
 		or $t6, $zero, $a0				# $t6 <- T
@@ -330,7 +330,7 @@ suite_bat:
 ###########################################################################################
 
 
-debug_affiche_grille:					# Fonction affichant tous les bateaux sur la grille
+fct_debug_affiche_grille:					# Fonction affichant tous les bateaux sur la grille
 										# Argument $a0 : adresse de la grille
 		lw $t0, 0($a0)					# $t0 <- T[0]
 		or $t6, $zero, $a0				# $t6 <- T
@@ -396,7 +396,7 @@ debug_for_aff_grille_colonne:
 ###########################################################################################
 
 
-pose_bateaux:							# Fonction posant un nombre de bateaux de même taille aléatoirement sur la grille
+fct_pose_bateaux:							# Fonction posant un nombre de bateaux de même taille aléatoirement sur la grille
 										# Arguments : $a0 <- adresse de la grille, $a1 <- nombre de bateaux à poser, $a2 <- taille des bateaux à poser
 										# Retourne dans $v0 le numéro du dernier bateau posé + 1 : numéro du prochain bateau à poser
 		subu $sp, $sp, 64				## Prologue
@@ -530,7 +530,7 @@ suite_if_orientation_pose_bateaux:
 ###########################################################################################
 
 
-encore_bateau:							# Fonction qui teste s'il reste le bateau d'indice donné
+fct_encore_bateau:							# Fonction qui teste s'il reste le bateau d'indice donné
 										# Argument $a0 : adresse de la grille, $a1 indice du bateau
 
 		addi $t0, $zero, 0              		# t0 <= i
@@ -556,7 +556,7 @@ ret1:
 ###########################################################################################
 
 
-remplit_grille:
+fct_remplit_grille:
 
 		subu $sp, $sp, 64				## Prologue
 		sw $fp, 60($sp)					##
@@ -566,22 +566,22 @@ remplit_grille:
 
 		addi $a1, $zero, 1				# préparation des arguments
 		addi $a2, $zero, 5
-		jal pose_bateaux 				# saut vers la fonction
+		jal fct_pose_bateaux 				# saut vers la fonction
 
 		lw $a0, 0($sp)
 		addi $a1, $zero, 1
 		addi $a2, $zero, 4
-		jal pose_bateaux
+		jal fct_pose_bateaux
 
 		lw $a0, 0($sp)
 		addi $a1, $zero, 2
 		addi $a2, $zero, 3
-		jal pose_bateaux
+		jal fct_pose_bateaux
 
 		lw $a0, 0($sp)
 		addi $a1, $zero, 1
 		addi $a2, $zero, 2
-		jal pose_bateaux
+		jal fct_pose_bateaux
 		or $t0, $zero, $v0				# Récupération de l'indice du dernier bateau
 
 		subi $v0, $t0, 1 				# return nombre de bateaux
@@ -595,7 +595,7 @@ remplit_grille:
 ###########################################################################################										
 
 
-tableau_score: 							# Arguments : $a0 <= score
+fct_tableau_score: 							# Arguments : $a0 <= score
 
 		add $t0, $a0, $zero 			# $t0 <= score
 		la $a0, nom_fichier
@@ -688,7 +688,7 @@ erreur_fichier:
 ###########################################################################################
 
 
-lecture_entier:
+fct_lecture_entier:
 			ori $t0, $zero, 47			# Code ASCII 0 - 1
 			ori $t1, $zero, 58			# Code ASCII 9 + 1
 			ori $t4, $zero, 113			# Code ASCII q
@@ -719,7 +719,7 @@ lecture_entier_quitter:
 ###########################################################################################
 
 
-tire:									# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur
+fct_tire:									# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur
 										# Arguments : $a0 <- adresse de la grille, $a1 <- adresse du nombre de bateaux restants
 					
 			subu $sp, $sp, 64			## Prologue
@@ -735,7 +735,7 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 			ori $v0, $zero, 4
 			syscall						# Affichage de "Ligne : "
 
-			jal lecture_entier
+			jal fct_lecture_entier
 			bltz $v0, tire_quitter
 			or $s0, $zero, $v0			# $s0 <- ligne
 
@@ -743,7 +743,7 @@ tire:									# Fonction tirant une torpille dans la case de coordonnées demand
 			ori $v0, $zero, 4
 			syscall						# Affichage de "Colonne : "
 
-			jal lecture_entier
+			jal fct_lecture_entier
 			bltz $v0, tire_quitter
 			or $s1, $zero, $v0			# $s1 <- colonne
 
@@ -787,7 +787,7 @@ tire_bateau_present:
 
 			lw $a0, 4($sp)
 			or $a1, $zero, $t3
-			jal encore_bateau			# Appel de encore_bateau(grille, indiceBateau)
+			jal fct_encore_bateau			# Appel de encore_bateau(grille, indiceBateau)
 			or $t5, $zero, $v0			# $t5 <- il y a encore un bateau
 			la $a1, 8($sp)				# Restauration des arguments
 
@@ -822,7 +822,7 @@ tire_bateau_suite:
 ###########################################################################################
 
 
-tire_debutant:							# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur en mode débutant
+fct_tire_debutant:							# Fonction tirant une torpille dans la case de coordonnées demandées à l'utilisateur en mode débutant
 										# Arguments : $a0 <- adresse de la grille, $a1 <- adresse du nombre de bateaux restant
 					
 			subu $sp, $sp, 64			## Prologue
@@ -838,7 +838,7 @@ tire_debutant:							# Fonction tirant une torpille dans la case de coordonnées
 			ori $v0, $zero, 4
 			syscall						# Affichage de "Ligne : "
 
-			jal lecture_entier
+			jal fct_lecture_entier
 			bltz $v0, tire_debutant_quitter
 			or $s0, $zero, $v0			# $s0 <- ligne
 
@@ -846,7 +846,7 @@ tire_debutant:							# Fonction tirant une torpille dans la case de coordonnées
 			ori $v0, $zero, 4
 			syscall						# Affichage de "Colonne : "
 
-			jal lecture_entier
+			jal fct_lecture_entier
 			bltz $v0, tire_debutant_quitter
 			or $s1, $zero, $v0			# $s1 <- colonne
 
@@ -916,7 +916,7 @@ tire_debutant_bateau_present:
 
 			lw $a0, 4($sp)
 			or $a1, $zero, $t3
-			jal encore_bateau			# Appel de encore_bateau(grille, indiceBateau)
+			jal fct_encore_bateau			# Appel de encore_bateau(grille, indiceBateau)
 			or $t5, $zero, $v0			# $t5 <- il y a encore un bateau
 			la $a1, 8($sp)				# Restauration des arguments
 
@@ -950,7 +950,7 @@ tire_debutant_bateau_suite:
 ###########################################################################################
 ###########################################################################################
 
-sauvegarde:								# Fonction sauvegardant la partie
+fct_sauvegarde:								# Fonction sauvegardant la partie
 										# Arguments: $a0 <- adresse de la grille, $a1 <- difficulté, $a2 <- nombre de coups, $a3 <- nombre de bateaux
 			subu $sp, $sp, 512			## Prologue
 			sw $fp, 508($sp)			##
@@ -972,7 +972,7 @@ sauvegarde:								# Fonction sauvegardant la partie
 			lw $a0, 4($sp)
 			addi $a1, $sp, 20
 			ori $a2, $zero, 100
-			jal copie_tab			# Copie de la grille dans la pile de la fonction
+			jal fct_copie_tab			# Copie de la grille dans la pile de la fonction
 
 
 			lw $a0, 504($sp)
@@ -1001,7 +1001,7 @@ sauvegarde_fin:
 ###########################################################################################
 ###########################################################################################
 
-copie_tab:								# Fonction copiant un tableau
+fct_copie_tab:								# Fonction copiant un tableau
 										# $a0 <- adresse de la grille à copier, $a1 <- adresse où copier la grille, $a2 <- taille du tableau en mots(=4 octets)
 			or $t0, $zero, $zero		# $t0 <- i=0
 copie_tab_for:
